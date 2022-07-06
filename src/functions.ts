@@ -1,5 +1,5 @@
 import { deployMockContract } from "ethereum-waffle";
-import { BigNumber, ContractReceipt } from "ethers";
+import { BigNumber, ContractReceipt, ContractTransaction, Overrides, Signer } from "ethers";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -9,8 +9,9 @@ import {
   MockWeth,
   MockWeth__factory,
 } from "../typechain";
+import { SentEvent } from "../typechain/IDeBridgeGate";
 
-import { DeBridgeGate as DeBridgeGateStructs } from "./structs";
+import { Flags, IRawSubmissionAutoParamsTo, ISubmissionAutoParamsTo, SubmissionAutoParamsFrom, SubmissionAutoParamsTo } from "./structs";
 
 function _check(hre: HardhatRuntimeEnvironment) {
   if (!["hardhat", "localhost"].includes(hre.network.name)) {
@@ -18,7 +19,9 @@ function _check(hre: HardhatRuntimeEnvironment) {
   }
 }
 
+//
 // Define the state so we can ease deBridgeSimulator usage
+//
 
 interface InternalEmulatorState {
   currentGate?: DeBridgeGate;
@@ -26,7 +29,9 @@ interface InternalEmulatorState {
 
 const STATE: InternalEmulatorState = {};
 
+//
 // deployGate
+//
 
 export type DeployDebridgeGateFunction = () => Promise<DeBridgeGate>;
 
@@ -107,24 +112,57 @@ export function makeDeployGate(
     // (c) https://blog.cloudflare.com/why-tls-1-3-isnt-in-browsers-yet/
     const [minRndFee, maxRndFee] = [0.001, 0.5];
     const randomGlobalFee = getRandom(minRndFee, maxRndFee, 18 /*decimals*/);
-    await deBridgeGate.updateGlobalFee(randomGlobalFee, 10 /*feeBps*/);
+    await deBridgeGate.updateGlobalFee(randomGlobalFee, 10 /*globalTransferFeeBps*/);
 
     STATE.currentGate = deBridgeGate;
     return deBridgeGate;
   };
 }
 
+//
+// autoClaim
+//
+
+export type AutoClaimFunction = (
+  opts?: GetClaimArgsOpts,
+  overrides?: Overrides & { from?: string | Promise<string> }
+) => Promise<ContractTransaction>;
+
+export function makeAutoClaimFunction(
+  hre: HardhatRuntimeEnvironment
+): AutoClaimFunction {
+  _check(hre);
+
+  return async function makeAutoClaim(
+    opts: GetClaimArgsOpts = {},
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction> {
+    opts.gate = opts.gate || STATE.currentGate;
+    if (!opts.gate) {
+      throw new Error("DeBridgeGate not yet deployed");
+    }
+
+    return await opts.gate.claim(
+      ...await hre.deBridge.emulator.getClaimArgs(opts, overrides)
+    )
+  }
+}
+
+//
 // getClaimArgs
+//
 
 type ClaimArgs = Parameters<DeBridgeGate["claim"]>;
 
 interface GetClaimArgsOpts {
   gate?: DeBridgeGate;
   sendTransactionReceipt?: ContractReceipt;
+  sentEvent?: SentEvent
 }
 
 export type GetClaimArgsFunction = (
-  opts?: GetClaimArgsOpts
+  opts?: GetClaimArgsOpts,
+  overrides?: Overrides & { from?: string | Promise<string> }
 ) => Promise<ClaimArgs>;
 
 export function makeGetClaimArgs(
@@ -133,7 +171,8 @@ export function makeGetClaimArgs(
   _check(hre);
 
   return async function getClaimArgs(
-    opts: GetClaimArgsOpts = {}
+    opts: GetClaimArgsOpts = {},
+    overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ClaimArgs> {
     opts.gate = opts.gate || STATE.currentGate;
     if (!opts.gate) {
@@ -141,7 +180,8 @@ export function makeGetClaimArgs(
     }
 
     // find the last Sent() event emitted
-    const sentEvent = (await opts.gate.queryFilter(opts.gate.filters.Sent()))
+    const sentEvent = opts.sentEvent ||
+     (await opts.gate.queryFilter(opts.gate.filters.Sent()))
       .reverse()
       .find((ev) =>
         opts.sendTransactionReceipt
@@ -154,7 +194,7 @@ export function makeGetClaimArgs(
 
     // decode SubmissionAutoParamsTo
     const autoParamsToValues = defaultAbiCoder.decode(
-      [DeBridgeGateStructs.SubmissionAutoParamsTo],
+      [SubmissionAutoParamsTo],
       sentEvent.args.autoParams
     )[0];
 
@@ -164,7 +204,7 @@ export function makeGetClaimArgs(
       sentEvent.args.nativeSender,
     ];
     const autoParamsFrom = defaultAbiCoder.encode(
-      [DeBridgeGateStructs.SubmissionAutoParamsFrom],
+      [SubmissionAutoParamsFrom],
       [autoParamsFromValues]
     );
 
@@ -176,6 +216,27 @@ export function makeGetClaimArgs(
       sentEvent.args.nonce,
       "0x123456",
       autoParamsFrom,
+      overrides || undefined
     ];
   };
+}
+
+//
+// decodeSubmissionAutoParamsToFunction
+//
+
+export type DecodeSubmissionAutoParamsToFunction = (event: SentEvent) => ISubmissionAutoParamsTo;
+
+export function makeDecodeSubmissionAutoParamsToFunction(hre: HardhatRuntimeEnvironment): Function {
+  return (event: SentEvent): ISubmissionAutoParamsTo => {
+    const struct = defaultAbiCoder.decode(
+      [SubmissionAutoParamsTo],
+      event.args.autoParams
+    )[0] as IRawSubmissionAutoParamsTo;
+
+    return {
+      ...struct,
+      flags: new Flags(struct.flags.toNumber()),
+    };
+  }
 }

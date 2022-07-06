@@ -1,5 +1,6 @@
 import "@typechain/hardhat";
-// import "@debridge-finance/hardhat-debridge";
+
+// need to import this package itself
 import "./src"
 
 /**

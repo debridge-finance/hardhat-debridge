@@ -1,6 +1,53 @@
+import { BigNumber } from "ethers";
 import { ParamType } from "ethers/lib/utils";
 
-const SubmissionAutoParamsTo = ParamType.from({
+export enum Flag {
+  UNWRAP_ETH = 0,
+  /// @dev Flag to revert if external call fails
+  REVERT_IF_EXTERNAL_FAIL = 1,
+  /// @dev Flag to call proxy with a sender contract
+  PROXY_WITH_SENDER = 2,
+  /// @dev Data is hash in DeBridgeGate send method
+  SEND_HASHED_DATA = 3,
+  /// @dev First 24 bytes from data is gas limit for external call
+  SEND_EXTERNAL_CALL_GAS_LIMIT = 4,
+  /// @dev Support multi send for externall call
+  MULTI_SEND = 5,
+}
+
+export class Flags {
+  private _flags: number = 0;
+
+  constructor(flags: number) {
+    this._flags = flags;
+  }
+
+  setFlags(...flags: Flag[]) {
+      flags.forEach(f => this.setFlag(f))
+  }
+
+  setFlag(flag: Flag) {
+      // tslint:disable-next-line:no-bitwise
+      this._flags = this._flags | 1 << flag;
+  }
+
+  unsetFlag(flag: Flag) {
+      // tslint:disable-next-line:no-bitwise
+      this._flags = this._flags & ~(1 << flag)
+  }
+
+  isSet(flag: Flag) {
+      // tslint:disable-next-line:no-bitwise
+      const v = (this._flags >> flag) & 1;
+      return v === 1;
+  }
+
+  toString() {
+      return this._flags.toString()
+  }
+}
+
+export const SubmissionAutoParamsTo = ParamType.from({
   type: "tuple",
   name: "SubmissionAutoParamsTo",
   components: [
@@ -11,7 +58,21 @@ const SubmissionAutoParamsTo = ParamType.from({
   ],
 });
 
-const SubmissionAutoParamsFrom = ParamType.from({
+export interface IRawSubmissionAutoParamsTo {
+  executionFee: BigNumber;
+  flags: BigNumber;
+  fallbackAddress: string;
+  data:  string;
+}
+
+export interface ISubmissionAutoParamsTo {
+  executionFee: BigNumber;
+  flags: Flags;
+  fallbackAddress: string;
+  data:  string;
+}
+
+export const SubmissionAutoParamsFrom = ParamType.from({
   type: "tuple",
   name: "SubmissionAutoParamsFrom",
   components: [
@@ -23,7 +84,10 @@ const SubmissionAutoParamsFrom = ParamType.from({
   ],
 });
 
-export const DeBridgeGate = {
-  SubmissionAutoParamsFrom,
-  SubmissionAutoParamsTo,
-};
+export interface IRawSubmissionAutoParamsFrom extends IRawSubmissionAutoParamsTo {
+  nativeSender: string;
+}
+
+export interface ISubmissionAutoParamsFrom extends ISubmissionAutoParamsTo {
+  nativeSender: string;
+}
