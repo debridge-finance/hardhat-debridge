@@ -22,28 +22,28 @@ export class Flags {
     this._flags = flags;
   }
 
-  setFlags(...flags: Flag[]) {
-      flags.forEach(f => this.setFlag(f))
+  public setFlags(...flags: Flag[]) {
+    flags.forEach((f) => this.setFlag(f));
   }
 
-  setFlag(flag: Flag) {
-      // tslint:disable-next-line:no-bitwise
-      this._flags = this._flags | 1 << flag;
+  public setFlag(flag: Flag) {
+    // tslint:disable-next-line:no-bitwise
+    this._flags = this._flags | (1 << flag);
   }
 
-  unsetFlag(flag: Flag) {
-      // tslint:disable-next-line:no-bitwise
-      this._flags = this._flags & ~(1 << flag)
+  public unsetFlag(flag: Flag) {
+    // tslint:disable-next-line:no-bitwise
+    this._flags = this._flags & ~(1 << flag);
   }
 
-  isSet(flag: Flag) {
-      // tslint:disable-next-line:no-bitwise
-      const v = (this._flags >> flag) & 1;
-      return v === 1;
+  public isSet(flag: Flag) {
+    // tslint:disable-next-line:no-bitwise
+    const v = (this._flags >> flag) & 1;
+    return v === 1;
   }
 
-  toString() {
-      return this._flags.toString()
+  public toString() {
+    return this._flags.toString();
   }
 }
 
@@ -62,14 +62,14 @@ export interface IRawSubmissionAutoParamsTo {
   executionFee: BigNumber;
   flags: BigNumber;
   fallbackAddress: string;
-  data:  string;
+  data: string;
 }
 
 export interface ISubmissionAutoParamsTo {
   executionFee: BigNumber;
   flags: Flags;
   fallbackAddress: string;
-  data:  string;
+  data: string;
 }
 
 export const SubmissionAutoParamsFrom = ParamType.from({
@@ -84,7 +84,8 @@ export const SubmissionAutoParamsFrom = ParamType.from({
   ],
 });
 
-export interface IRawSubmissionAutoParamsFrom extends IRawSubmissionAutoParamsTo {
+export interface IRawSubmissionAutoParamsFrom
+  extends IRawSubmissionAutoParamsTo {
   nativeSender: string;
 }
 

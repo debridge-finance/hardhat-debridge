@@ -1,5 +1,11 @@
 import { deployMockContract } from "ethereum-waffle";
-import { BigNumber, ContractReceipt, ContractTransaction, Overrides, Signer } from "ethers";
+import {
+  BigNumber,
+  ContractReceipt,
+  ContractTransaction,
+  Overrides,
+  Signer,
+} from "ethers";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -11,7 +17,13 @@ import {
 } from "../typechain";
 import { SentEvent } from "../typechain/IDeBridgeGate";
 
-import { Flags, IRawSubmissionAutoParamsTo, ISubmissionAutoParamsTo, SubmissionAutoParamsFrom, SubmissionAutoParamsTo } from "./structs";
+import {
+  Flags,
+  IRawSubmissionAutoParamsTo,
+  ISubmissionAutoParamsTo,
+  SubmissionAutoParamsFrom,
+  SubmissionAutoParamsTo,
+} from "./structs";
 
 function _check(hre: HardhatRuntimeEnvironment) {
   if (!["hardhat", "localhost"].includes(hre.network.name)) {
@@ -112,7 +124,10 @@ export function makeDeployGate(
     // (c) https://blog.cloudflare.com/why-tls-1-3-isnt-in-browsers-yet/
     const [minRndFee, maxRndFee] = [0.001, 0.5];
     const randomGlobalFee = getRandom(minRndFee, maxRndFee, 18 /*decimals*/);
-    await deBridgeGate.updateGlobalFee(randomGlobalFee, 10 /*globalTransferFeeBps*/);
+    await deBridgeGate.updateGlobalFee(
+      randomGlobalFee,
+      10 /*globalTransferFeeBps*/
+    );
 
     STATE.currentGate = deBridgeGate;
     return deBridgeGate;
@@ -142,10 +157,10 @@ export function makeAutoClaimFunction(
       throw new Error("DeBridgeGate not yet deployed");
     }
 
-    return await opts.gate.claim(
-      ...await hre.deBridge.emulator.getClaimArgs(opts, overrides)
-    )
-  }
+    return opts.gate.claim(
+      ...(await hre.deBridge.emulator.getClaimArgs(opts, overrides))
+    );
+  };
 }
 
 //
@@ -157,7 +172,7 @@ type ClaimArgs = Parameters<DeBridgeGate["claim"]>;
 interface GetClaimArgsOpts {
   gate?: DeBridgeGate;
   sendTransactionReceipt?: ContractReceipt;
-  sentEvent?: SentEvent
+  sentEvent?: SentEvent;
 }
 
 export type GetClaimArgsFunction = (
@@ -180,14 +195,15 @@ export function makeGetClaimArgs(
     }
 
     // find the last Sent() event emitted
-    const sentEvent = opts.sentEvent ||
-     (await opts.gate.queryFilter(opts.gate.filters.Sent()))
-      .reverse()
-      .find((ev) =>
-        opts.sendTransactionReceipt
-          ? ev.transactionHash === opts.sendTransactionReceipt.transactionHash
-          : true
-      );
+    const sentEvent =
+      opts.sentEvent ||
+      (await opts.gate.queryFilter(opts.gate.filters.Sent()))
+        .reverse()
+        .find((ev) =>
+          opts.sendTransactionReceipt
+            ? ev.transactionHash === opts.sendTransactionReceipt.transactionHash
+            : true
+        );
     if (!sentEvent) {
       throw new Error("Sent() event not found");
     }
@@ -216,7 +232,7 @@ export function makeGetClaimArgs(
       sentEvent.args.nonce,
       "0x123456",
       autoParamsFrom,
-      overrides || undefined
+      overrides || undefined,
     ];
   };
 }
@@ -225,9 +241,13 @@ export function makeGetClaimArgs(
 // decodeSubmissionAutoParamsToFunction
 //
 
-export type DecodeSubmissionAutoParamsToFunction = (event: SentEvent) => ISubmissionAutoParamsTo;
+export type DecodeSubmissionAutoParamsToFunction = (
+  event: SentEvent
+) => ISubmissionAutoParamsTo;
 
-export function makeDecodeSubmissionAutoParamsToFunction(hre: HardhatRuntimeEnvironment): Function {
+export function makeDecodeSubmissionAutoParamsToFunction(
+  hre: HardhatRuntimeEnvironment
+): DecodeSubmissionAutoParamsToFunction {
   return (event: SentEvent): ISubmissionAutoParamsTo => {
     const struct = defaultAbiCoder.decode(
       [SubmissionAutoParamsTo],
@@ -238,5 +258,5 @@ export function makeDecodeSubmissionAutoParamsToFunction(hre: HardhatRuntimeEnvi
       ...struct,
       flags: new Flags(struct.flags.toNumber()),
     };
-  }
+  };
 }
