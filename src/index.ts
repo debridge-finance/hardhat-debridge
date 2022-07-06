@@ -1,6 +1,6 @@
 import "@nomiclabs/hardhat-ethers";
 import "@openzeppelin/hardhat-upgrades";
-import { Event, Signer } from "ethers";
+import { Event } from "ethers";
 import { extendEnvironment, subtask, task } from "hardhat/config";
 import { lazyObject } from "hardhat/plugins";
 import {
@@ -16,7 +16,6 @@ import {
   GetClaimArgsFunction,
 } from "./functions";
 import "./type-extensions";
-
 
 const TASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT = "debridge-deploy-emulator-contract"
 const SUBTASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT_AND_RUN_LISTENER = "subtask-debrige-deploy-emulator"

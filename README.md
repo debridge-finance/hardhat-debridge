@@ -1,6 +1,6 @@
 # hardhat-debridge
 
-**Easily test your integrations with the [deBridge cross-chain protocol](https://debridge.finance).** A plugin for [Hardhat](https://hardhat.org) provides the toolkit for emulating the flow of the bridge, including onchain contracts and off-chain validation activity.
+**Easily test your integrations with [deBridge](https://debridge.finance).** A plugin for [Hardhat](https://hardhat.org) provides the toolkit for emulating the flow of the bridge, including onchain contracts and off-chain validation activity.
 
 ## Rationale
 
@@ -9,8 +9,8 @@
 `hardhat-debridge` provides the toolkit for creating lightweight and blazing-fast emulation environment on top of [hardhat network](https://hardhat.org/hardhat-network), behaving close to how the mainnet setup of the deBridge infrastructure does.
 
 In a nutshell, this plugin is suitable to validate cross-chain interactions as follows:
-- developing unit test cases for your contracts, where deBridge infrastructure emulator is a part of a runtime (runtime emulation);
-- performing functional/integration tests against deBridge infrastructure emulator running as a local process
+- developing **unit test cases** for your contracts, or developing **integration test cases** to validate the behavior and the interaction between the contracts intended to reside on the different chains and communicate through the deBridge gate: deBridge infrastructure emulator is a part of a runtime (runtime emulation);
+- performing **functional tests** on the deBridge infrastructure emulator running as a local process.
 
 ## Installation
 
@@ -36,9 +36,60 @@ import "@debridge-finance/hardhat-debridge";
 
 Consider looking into [`debridge-finance/cross-chain-dapp-example`](https://github.com/debridge-finance/) repo representing the complete example of the fictional cross-chain dApp which leverages the deBridge protocol for sending increment commands across chains. Under the hood, that example if excessively covered with simple units tests made possible with the help of this `hardhat-debridge` plugin.
 
-## Making tests
+## Writing tests
 
-...
+Import `deBridge` from hardhat:
+
+```ts
+import { deBridge } from "hardhat";
+```
+
+Use `deBridge.emulation.deployGate()` for local deployment of the deBridgeGate emulation contract. Use `deBridge.emulation.autoClaim()` to invoke the emulation of the bridging process, where the claim txn is being constructed and executed like it has to be on the mainnet.
+
+Example:
+
+```ts
+describe("Test Suite #1", function () {
+
+    let gate: any;
+    let senderContractChainA: any;
+    let calleeContractChainB: any;
+
+    before(async () => {
+        //
+        // deploy emulation contract
+        //
+        gate = await deBridge.emulator.deployGate();
+
+        //
+        // deploy the contracts you are willing to test
+        //
+        senderContractChainA = await getSenderContract();
+        calleeContractChainB = await getCalleeContract(senderContractChainA.address);
+    })
+
+    it("Test Case #1", async () => {
+        // Call the sender contract which interacts with the deBridgeGate under the hood
+        // asking it to broadcast a message. A message is an instruction to call
+        // the callee contract. A call may contain arbitrary values, if the callee
+        // contract's ABI is expects them.
+        await senderContractChainA.sendValueToChainB(senderContractChainA.VALUE_1, {
+            value: await gate.globalFixedNativeFee()
+        });
+
+        // Invoke the bridging emulation (claim tnx has to be executed automatically)
+        // Here, the message constructed by the sender contract will be
+        // broadcasted to the same chain and executed by deBridgeGate. During the
+        // execution of the message, the deBridgeGate will call the callee contract
+        // via deBridgeGate's CallProxy contract.
+        await deBridge.emulator.autoClaim();
+
+        // validate that callee contract has been called and received a value
+        expect(await calleeContractChainB.receivedValue())
+            .to.be.eq(senderContractChainA.VALUE_1)
+    });
+});
+```
 
 ## Running the emulator daemon
 
