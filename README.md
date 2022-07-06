@@ -44,7 +44,7 @@ Import `deBridge` from hardhat:
 import { deBridge } from "hardhat";
 ```
 
-Use `deBridge.emulation.deployGate()` for local deployment of the deBridgeGate emulation contract. Use `deBridge.emulation.autoClaim()` to invoke the emulation of the bridging process, where the claim txn is being constructed and executed like it has to be on the mainnet.
+Use `deBridge.emulation.deployGate()` to deploy the deBridgeGate emulation contract to the current hardhat network. Use `deBridge.emulation.autoClaim()` to invoke the emulation of the bridging process, while the claim txn is being constructed and executed like it has to be on the mainnet.
 
 Example:
 
