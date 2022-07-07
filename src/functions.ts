@@ -210,7 +210,7 @@ export function makeGetClaimArgs(
       sentEvent.args.nonce,
       "0x123456",
       convertSentAutoParamsToClaimAutoParams(sentEvent),
-      overrides || undefined,
+      overrides || {},
     ];
   };
 }

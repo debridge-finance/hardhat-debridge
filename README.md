@@ -1,6 +1,6 @@
 # hardhat-debridge
 
-**Easily test your integrations with [deBridge](https://debridge.finance).** A plugin for [Hardhat](https://hardhat.org) provides the toolkit for emulating the flow of the bridge, including onchain contracts and off-chain validation activity.
+**Easily test your integrations with [deBridge](https://debridge.finance).** A plugin for [Hardhat](https://hardhat.org) provides the toolkit to test and emulate dApps built on top of deBridge protocol.
 
 ## Rationale
 

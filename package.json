@@ -1,15 +1,14 @@
 {
   "name": "@debridge-finance/hardhat-debridge",
   "version": "0.0.1",
-  "description": "Debridge plugin for HardHat",
+  "description": "A plugin for Hardhat that provides the toolkit to test and emulate dApps built on top of deBridge protocol.",
   "repository": "github:debridge-finance/hardhat-debridge",
-  "author": "DeBridge.Finance",
+  "author": "Debridge.Finance",
   "license": "MIT",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "keywords": [
-    "ethereum",
-    "smart-contracts",
+    "bridge",
     "hardhat",
     "hardhat-plugin"
   ],
