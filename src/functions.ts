@@ -4,7 +4,6 @@ import {
   ContractReceipt,
   ContractTransaction,
   Overrides,
-  Signer,
 } from "ethers";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
@@ -17,13 +16,8 @@ import {
 } from "../typechain";
 import { SentEvent } from "../typechain/IDeBridgeGate";
 
-import {
-  Flags,
-  IRawSubmissionAutoParamsTo,
-  ISubmissionAutoParamsTo,
-  SubmissionAutoParamsFrom,
-  SubmissionAutoParamsTo,
-} from "./structs";
+import { SubmissionAutoParamsFrom, SubmissionAutoParamsTo } from "./structs";
+import { convertSentAutoParamsToClaimAutoParams } from "./utils";
 
 function _check(hre: HardhatRuntimeEnvironment) {
   if (!["hardhat", "localhost"].includes(hre.network.name)) {
@@ -208,22 +202,6 @@ export function makeGetClaimArgs(
       throw new Error("Sent() event not found");
     }
 
-    // decode SubmissionAutoParamsTo
-    const autoParamsToValues = defaultAbiCoder.decode(
-      [SubmissionAutoParamsTo],
-      sentEvent.args.autoParams
-    )[0];
-
-    // make SubmissionAutoParamsFrom based on SubmissionAutoParamsTo value
-    const autoParamsFromValues = [
-      ...autoParamsToValues,
-      sentEvent.args.nativeSender,
-    ];
-    const autoParamsFrom = defaultAbiCoder.encode(
-      [SubmissionAutoParamsFrom],
-      [autoParamsFromValues]
-    );
-
     return [
       sentEvent.args.debridgeId,
       sentEvent.args.amount,
@@ -231,32 +209,8 @@ export function makeGetClaimArgs(
       sentEvent.args.receiver,
       sentEvent.args.nonce,
       "0x123456",
-      autoParamsFrom,
+      convertSentAutoParamsToClaimAutoParams(sentEvent),
       overrides || undefined,
     ];
-  };
-}
-
-//
-// decodeSubmissionAutoParamsToFunction
-//
-
-export type DecodeSubmissionAutoParamsToFunction = (
-  event: SentEvent
-) => ISubmissionAutoParamsTo;
-
-export function makeDecodeSubmissionAutoParamsToFunction(
-  hre: HardhatRuntimeEnvironment
-): DecodeSubmissionAutoParamsToFunction {
-  return (event: SentEvent): ISubmissionAutoParamsTo => {
-    const struct = defaultAbiCoder.decode(
-      [SubmissionAutoParamsTo],
-      event.args.autoParams
-    )[0] as IRawSubmissionAutoParamsTo;
-
-    return {
-      ...struct,
-      flags: new Flags(struct.flags.toNumber()),
-    };
   };
 }

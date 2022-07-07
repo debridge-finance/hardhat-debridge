@@ -1,6 +1,8 @@
 import { BigNumber } from "ethers";
 import { ParamType } from "ethers/lib/utils";
 
+import { SentEvent } from "../typechain/DeBridgeGate";
+
 export enum Flag {
   UNWRAP_ETH = 0,
   /// @dev Flag to revert if external call fails
@@ -44,6 +46,26 @@ export class Flags {
 
   public toString() {
     return this._flags.toString();
+  }
+
+  public getFlags(): Flag[] {
+    const ret: Flag[] = [];
+    Object.keys(Flag).forEach((fl) => {
+      const flag = Flag[fl as keyof typeof Flag];
+      if (this.isSet(flag)) {
+        ret.push(flag);
+      }
+    });
+    return ret;
+  }
+
+  public toHumanReadableString() {
+    const assertedFlags: string[] = [];
+    this.getFlags().forEach((flag) => {
+      assertedFlags.push(Flag[flag]);
+    });
+
+    return `Flags { ${assertedFlags.join(", ")} }`;
   }
 }
 

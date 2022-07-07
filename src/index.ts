@@ -1,24 +1,25 @@
 import "@nomiclabs/hardhat-ethers";
 import "@openzeppelin/hardhat-upgrades";
-import { Event } from "ethers";
+import { BigNumber } from "ethers";
+import {
+  TASK_NODE,
+  TASK_NODE_SERVER_READY,
+} from "hardhat/builtin-tasks/task-names";
 import { extendEnvironment, subtask, task } from "hardhat/config";
 import { lazyObject } from "hardhat/plugins";
-import {
-  TASK_NODE, TASK_NODE_SERVER_READY,
-} from 'hardhat/builtin-tasks/task-names';
 
-import { SentEvent } from "../typechain/IDeBridgeGate";
-
+import { DeBridgeEmulator } from "./emulator";
 import {
   AutoClaimFunction,
-  DecodeSubmissionAutoParamsToFunction,
   DeployDebridgeGateFunction,
   GetClaimArgsFunction,
 } from "./functions";
 import "./type-extensions";
 
-const TASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT = "debridge-deploy-emulator-contract"
-const SUBTASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT_AND_RUN_LISTENER = "subtask-debrige-deploy-emulator"
+const TASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT =
+  "debridge-deploy-emulator-contract";
+const SUBTASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT_AND_RUN_LISTENER =
+  "subtask-debrige-deploy-emulator";
 
 let localArgs: any = null;
 
@@ -28,10 +29,6 @@ export interface DeBridge {
     autoClaim: AutoClaimFunction;
     getClaimArgs: GetClaimArgsFunction;
   };
-
-  utils: {
-    decodeSubmissionAutoParamsTo: DecodeSubmissionAutoParamsToFunction;
-  };
 }
 
 extendEnvironment((hre) => {
@@ -40,7 +37,6 @@ extendEnvironment((hre) => {
       const {
         makeDeployGate,
         makeGetClaimArgs,
-        makeDecodeSubmissionAutoParamsToFunction,
         makeAutoClaimFunction,
       } = require("./functions");
 
@@ -49,11 +45,6 @@ extendEnvironment((hre) => {
           deployGate: makeDeployGate(hre),
           autoClaim: makeAutoClaimFunction(hre),
           getClaimArgs: makeGetClaimArgs(hre),
-        },
-        utils: {
-          decodeSubmissionAutoParamsTo: makeDecodeSubmissionAutoParamsToFunction(
-            hre
-          ),
         },
       };
     }
@@ -66,11 +57,12 @@ task(
 ).setAction(async (args, hre) => {
   const gate = await hre.deBridge.emulator.deployGate();
 
-  console.log(`DeBridgeGate emulator contract has been deployed at \x1b[31m ${gate.address} \x1b[0m`);
+  console.log(
+    `DeBridgeGate emulator contract has been deployed at \x1b[31m ${gate.address} \x1b[0m`
+  );
 
-  return gate
+  return gate;
 });
-
 
 subtask(TASK_NODE_SERVER_READY).setAction(async (args, hre, runSuper) => {
   await runSuper(args);
@@ -89,91 +81,18 @@ subtask(SUBTASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT_AND_RUN_LISTENER)
     "0"
   )
   .setAction(async (args, hre) => {
-    const gate = await hre.run(TASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT)
-
-    // we need to listen for '*' rather than 'event' because the latter doesn't daemonize the process for some reason
-    gate.on("*", async (obj: Event) => {
-      // take only Event objects
-      if (
-        obj.event !== undefined &&
-        obj.args !== undefined &&
-        obj.blockNumber > gate.deployTransaction.blockNumber!
-      ) {
-        // cleanup args: by default they are represented as an Array, where args
-        // are represented both as array keys and as array/object properties
-        // To make a cleaner output, we leave only object properties
-        const eventArgsObj = {} as any;
-        Object.keys(obj.args)
-          .filter((key) => !/^\d+$/.test(key))
-          .forEach((key) => {
-            eventArgsObj[key] = obj.args![key];
-          });
-
-        // print only these events for cleaner output
-        if (["Sent", "Claimed"].includes(obj.event)) {
-          console.log(
-            `Captured event: \x1b[32m ${obj.event} \x1b[0m`,
-            eventArgsObj
-          );
-        }
-
-        // handle the Sent event, process automatic claim if applicable
-        if (obj.event === "Sent") {
-          const sentEvent = obj as SentEvent;
-          console.log(
-            `📣 Captured submission: \x1b[31m ${sentEvent.args.submissionId} \x1b[0m`
-          );
-
-          const autoParams = hre.deBridge.utils.decodeSubmissionAutoParamsTo(
-            sentEvent
-          );
-
-          if (autoParams.executionFee.lt(args.minExecutionFee)) {
-            console.log(
-              `[SubmissionId: \x1b[31m${
-                sentEvent.args.submissionId
-              }\x1b[0m] Broadcasted execution fee (${autoParams.executionFee.toString()}) is less than minimum (${
-                args.minExecutionFee
-              }), skipping automatic claim`
-            );
-            return;
-          }
-
-          console.log(
-            `[SubmissionId: \x1b[31m${sentEvent.args.submissionId}\x1b[0m] Signing and broadcasting a claim txn`
-          );
-
-          try {
-            const claimTx = await gate.claim(
-              ...(await hre.deBridge.emulator.getClaimArgs(
-                {
-                  sentEvent,
-                },
-                {
-                  gasLimit: 8_000_000,
-                }
-              ))
-            );
-
-            await claimTx.wait();
-          } catch (e) {
-            const txHash = (e as any)?.data?.txHash as string;
-            const errMessage = (e as any)?.data?.message || e;
-            console.error(
-              `[SubmissionId: \x1b[31m${sentEvent.args.submissionId}\x1b[0m] Claim txn failed: ${errMessage}`,
-              txHash
-            );
-          }
-        }
-      }
+    const gate = await hre.run(TASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT);
+    const emulator = new DeBridgeEmulator(gate, {
+      minExFee: BigNumber.from(args.minExecutionFee),
     });
+
+    emulator.run();
 
     // this is needed to keep this task running as a fg daemon
     return new Promise(() => {
       /*_*/
     });
   });
-
 
 task(
   "debridge-run-emulator",
@@ -188,11 +107,13 @@ task(
     if (hre.network.name === "hardhat") {
       localArgs = {
         ...args,
-        RUN_TASK: SUBTASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT_AND_RUN_LISTENER
+        RUN_TASK: SUBTASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT_AND_RUN_LISTENER,
       };
       return hre.run(TASK_NODE);
-    }
-    else {
-      return hre.run(SUBTASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT_AND_RUN_LISTENER, args)
+    } else {
+      return hre.run(
+        SUBTASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT_AND_RUN_LISTENER,
+        args
+      );
     }
   });
