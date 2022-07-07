@@ -58,7 +58,7 @@ task(
   const gate = await hre.deBridge.emulator.deployGate();
 
   console.log(
-    `DeBridgeGate emulator contract has been deployed at \x1b[31m ${gate.address} \x1b[0m`
+    `DeBridgeGate emulator contract has been deployed at \x1b[31m${gate.address}\x1b[0m`
   );
 
   return gate;
@@ -87,6 +87,7 @@ subtask(SUBTASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT_AND_RUN_LISTENER)
     });
 
     emulator.run();
+    console.log('DeBridge emulator is waiting for events...');
 
     // this is needed to keep this task running as a fg daemon
     return new Promise(() => {

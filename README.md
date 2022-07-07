@@ -20,13 +20,7 @@ Install the package:
 npm install --save-dev @debridge-finance/hardhat-debridge
 ```
 
-Import the plugin in your `hardhat.config.js`:
-
-```js
-require("@debridge-finance/hardhat-debridge");
-```
-
-Or if you are using TypeScript, in your `hardhat.config.ts`:
+Import the plugin in your `hardhat.config.ts`:
 
 ```ts
 import "@debridge-finance/hardhat-debridge";
@@ -38,13 +32,15 @@ Consider looking into [`debridge-finance/cross-chain-dapp-example`](https://gith
 
 ## Writing tests
 
-Import `deBridge` from hardhat:
+After this plugin is being installed, import `deBridge` object into your test file:
 
 ```ts
 import { deBridge } from "hardhat";
 ```
 
-Use `deBridge.emulation.deployGate()` to deploy the deBridgeGate emulation contract to the current hardhat network. Use `deBridge.emulation.autoClaim()` to invoke the emulation of the bridging process, while the claim txn is being constructed and executed like it has to be on the mainnet.
+Use `deBridge.emulation.deployGate()` to deploy the deBridgeGate emulation contract to the current hardhat network; then you can point your contracts (that are responsible for invoking `deBridgeGate` contract to pass messages to other chains) to this deployed contract.
+
+Use `deBridge.emulation.autoClaim()` to invoke the emulation of the bridging process: this will construct the claim txn (intended to be broadcasted to the destination chain) and execute it immediately.
 
 Example:
 
@@ -64,8 +60,8 @@ describe("Test Suite #1", function () {
         //
         // deploy the contracts you are willing to test
         //
-        senderContractChainA = await getSenderContract();
-        calleeContractChainB = await getCalleeContract(senderContractChainA.address);
+        senderContractChainA = await deploySenderContract();
+        calleeContractChainB = await deployCalleeContract(senderContractChainA.address);
     })
 
     it("Test Case #1", async () => {
@@ -93,4 +89,23 @@ describe("Test Suite #1", function () {
 
 ## Running the emulator daemon
 
+`hardhat-debridge` plugin comes with the emulator, which deploys the loopback bridge to the currently running node and starts bridging messages coming to bridge back to the same chain.
+
+To create your local test bench:
+
+1. Run the local node in the first console, e.g.:
+```
+❯❯❯ npx hardhat node
+Started HTTP and WebSocket JSON-RPC server at http://127.0.0.1:8545/
 ...
+```
+2. Run the deBridge emulator in the second console, it will deploy a configured loopback bridge and print its address first:
+```
+❯❯❯ npx hardhat debridge-run-emulator --network localhost
+DeBridgeGate emulator contract has been deployed at 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
+DeBridge emulator is waiting for events...
+...
+```
+3. In the third console, deploy your sender and receiver contracts to the same local node. Of course, these contracts are intended to reside on different chains, but for emulation purposes we use a loopback bridge, which assumes sender and receiver are on the same chain still communicating though the `deBridgeGate` contract.
+
+Start calling your sender contract: you'll see transactions being printed in the first console while messages coming to the `deBridgeGate` contract being captured and bridged back in the second console.

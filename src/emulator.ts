@@ -93,7 +93,7 @@ export class DeBridgeEmulator {
         (await this.gate.provider.getNetwork()).chainId,
         sentEvent.args.receiver,
         sentEvent.args.nonce,
-        "0x123456",
+        "0x123456", // signatureVerifier is mocked, accepts arbitrary data
         convertSentAutoParamsToClaimAutoParams(sentEvent),
         {
           gasLimit: 8_000_000,
