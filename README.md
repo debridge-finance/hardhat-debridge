@@ -93,19 +93,19 @@ describe("Test Suite #1", function () {
 
 To create your local test bench:
 
-1. Run the local node in the first console, e.g.:
+1. Run the local node in the first terminal, e.g.:
 ```
 ❯❯❯ npx hardhat node
 Started HTTP and WebSocket JSON-RPC server at http://127.0.0.1:8545/
 ...
 ```
-2. Run the deBridge emulator in the second console, it will deploy a configured loopback bridge and print its address first:
+2. Run the deBridge emulator in the second terminal, it will deploy a configured loopback bridge and print its address first:
 ```
 ❯❯❯ npx hardhat debridge-run-emulator --network localhost
 DeBridgeGate emulator contract has been deployed at 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
 DeBridge emulator is waiting for events...
 ...
 ```
-3. In the third console, deploy your sender and receiver contracts to the same local node. Of course, these contracts are intended to reside on different chains, but for emulation purposes we use a loopback bridge, which assumes sender and receiver are on the same chain still communicating though the `deBridgeGate` contract.
+3. In the third terminal, deploy your sender and receiver contracts to the same local node. Of course, these contracts are intended to reside on different chains, but for emulation purposes we use a loopback bridge, which assumes sender and receiver are on the same chain still communicating though the `deBridgeGate` contract.
 
-Start calling your sender contract: you'll see transactions being printed in the first console while messages coming to the `deBridgeGate` contract being captured and bridged back in the second console.
+Start calling your sender contract: you'll see transactions being printed in the first terminal while messages coming to the `deBridgeGate` contract being captured and bridged back in the second terminal.
