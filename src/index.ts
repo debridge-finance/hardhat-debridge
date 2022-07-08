@@ -87,7 +87,7 @@ subtask(SUBTASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT_AND_RUN_LISTENER)
     });
 
     emulator.run();
-    console.log('DeBridge emulator is waiting for events...');
+    console.log("DeBridge emulator is waiting for events...");
 
     // this is needed to keep this task running as a fg daemon
     return new Promise(() => {

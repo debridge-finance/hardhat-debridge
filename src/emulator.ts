@@ -4,6 +4,7 @@ import { DeBridgeGate } from "../typechain";
 import { ClaimedEvent, SentEvent } from "../typechain/DeBridgeGate";
 
 import {
+  collapseArgs,
   convertSentAutoParamsToClaimAutoParams,
   parseAutoParamsFrom,
   parseAutoParamsTo,
@@ -27,14 +28,10 @@ export class DeBridgeEmulator {
     // cleanup args: by default they are represented as an Array, where args
     // are represented both as array keys and as array/object properties
     // To make a cleaner output, we leave only object properties
-    const eventArgsObj = {} as any;
-    Object.keys(event.args!)
-      .filter((key) => !/^\d+$/.test(key))
-      .forEach((key) => {
-        eventArgsObj[key] = event.args![key as any];
-      });
+    const eventArgsObj = collapseArgs(event.args) as any;
 
     if (event.event === "Sent") {
+      eventArgsObj.feeParams = collapseArgs(eventArgsObj.feeParams);
       eventArgsObj.autoParams = parseAutoParamsTo(event as SentEvent);
       eventArgsObj.autoParams.flags = eventArgsObj.autoParams.flags.toHumanReadableString();
     } else if (event.event === "Claimed") {

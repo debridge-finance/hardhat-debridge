@@ -12,11 +12,23 @@ import {
   SubmissionAutoParamsTo,
 } from "./structs";
 
+export function collapseArgs(args: any[]): object {
+  // cleanup args: by default they are represented as an Array, where args
+  // are represented both as array keys and as array/object properties
+  // To make a cleaner output, we leave only object properties
+  const eventArgsObj = {} as any;
+  Object.keys(args)
+    .filter((key) => !/^\d+$/.test(key))
+    .forEach((key) => {
+      eventArgsObj[key] = args[key as any];
+    });
+  return eventArgsObj;
+}
+
 export function parseAutoParamsTo(source: SentEvent): ISubmissionAutoParamsTo {
-  const struct = defaultAbiCoder.decode(
-    [SubmissionAutoParamsTo],
-    source.args.autoParams
-  )[0] as IRawSubmissionAutoParamsTo;
+  const struct = collapseArgs(
+    defaultAbiCoder.decode([SubmissionAutoParamsTo], source.args.autoParams)[0]
+  ) as IRawSubmissionAutoParamsTo;
 
   return {
     ...struct,
@@ -27,10 +39,12 @@ export function parseAutoParamsTo(source: SentEvent): ISubmissionAutoParamsTo {
 export function parseAutoParamsFrom(
   source: ClaimedEvent
 ): ISubmissionAutoParamsFrom {
-  const struct = defaultAbiCoder.decode(
-    [SubmissionAutoParamsFrom],
-    source.args.autoParams
-  )[0] as IRawSubmissionAutoParamsFrom;
+  const struct = collapseArgs(
+    defaultAbiCoder.decode(
+      [SubmissionAutoParamsFrom],
+      source.args.autoParams
+    )[0]
+  ) as IRawSubmissionAutoParamsFrom;
 
   return {
     ...struct,

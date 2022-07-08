@@ -28,7 +28,7 @@ import "@debridge-finance/hardhat-debridge";
 
 ## Examples
 
-Consider looking into [`debridge-finance/cross-chain-dapp-example`](https://github.com/debridge-finance/) repo representing the complete example of the fictional cross-chain dApp which leverages the deBridge protocol for sending increment commands across chains. Under the hood, that example if excessively covered with simple units tests made possible with the help of this `hardhat-debridge` plugin.
+Consider looking into [`debridge-finance/debridge-cross-chain-dapp-example`](https://github.com/debridge-finance/debridge-cross-chain-dapp-example) repo representing a complete example of a fictional cross-chain dApp which leverages the deBridge protocol to send calls between its contracts across chains. Under the hood, that example if excessively covered with simple units tests made possible with the help of this `hardhat-debridge` plugin.
 
 ## Writing tests
 
