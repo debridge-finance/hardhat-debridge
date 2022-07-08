@@ -84,10 +84,10 @@ subtask(SUBTASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT_AND_RUN_LISTENER)
     const gate = await hre.run(TASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT);
     const emulator = new DeBridgeEmulator(gate, {
       minExFee: BigNumber.from(args.minExecutionFee),
+      autoClaim: !args.noAutoClaim,
     });
 
     emulator.run();
-    console.log("DeBridge emulator is waiting for events...");
 
     // this is needed to keep this task running as a fg daemon
     return new Promise(() => {
@@ -101,8 +101,12 @@ task(
 )
   .addOptionalParam(
     "minExecutionFee",
-    "Claiming emulation service will automatically construct and broadcast claiming txns with this minimum execution fee included",
+    "Emulator will automatically construct and broadcast txns that claim messages coming to bridge with this minimum execution fee included",
     "0"
+  )
+  .addFlag(
+    "noAutoClaim",
+    "Disables emulator to construct and broadcast txns to claim messages coming to bridge"
   )
   .setAction(async (args, hre) => {
     if (hre.network.name === "hardhat") {

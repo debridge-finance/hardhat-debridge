@@ -1,4 +1,5 @@
-import { BigNumber, Event } from "ethers";
+import chalk from "chalk";
+import { BigNumber, Event, utils } from "ethers";
 
 import { DeBridgeGate } from "../typechain";
 import { ClaimedEvent, SentEvent } from "../typechain/DeBridgeGate";
@@ -12,16 +13,43 @@ import {
 
 interface DeBridgeEmulatorOpts {
   minExFee: BigNumber;
+  autoClaim: boolean;
 }
+
+const DEFAULT_OPTS: DeBridgeEmulatorOpts = {
+  minExFee: BigNumber.from("0"),
+  autoClaim: true,
+};
 
 export class DeBridgeEmulator {
   constructor(
     private gate: DeBridgeGate,
-    private opts: DeBridgeEmulatorOpts = { minExFee: BigNumber.from("0") }
-  ) {}
+    private opts: DeBridgeEmulatorOpts = DEFAULT_OPTS
+  ) {
+    console.info("DeBridge emulator is starting...");
+    if (opts.autoClaim) {
+      console.info(
+        "Will automatically construct and broadcast txns to the destination chain to claim messages coming to the deBridgeGate contract on the origin chain"
+      );
+      if (opts.minExFee.gt("0")) {
+        console.info(
+          chalk.yellow(
+            `Only messages with at least ${chalk.bold(
+              utils.formatEther(opts.minExFee)
+            )} ETH included in the executionFee will be automatically claimed`
+          )
+        );
+      }
+    } else {
+      console.warn(
+        chalk.yellow("Will not construct txns to claim messages either")
+      );
+    }
+  }
 
   public run() {
     this.gate.on("*", async (obj: Event) => this.listener(obj));
+    console.info("DeBridge emulator is waiting for events...");
   }
 
   private unwindEventArgs(event: SentEvent | ClaimedEvent): object {
@@ -55,7 +83,7 @@ export class DeBridgeEmulator {
     // To make a cleaner output, we leave only object properties
     const eventArgsObj = this.unwindEventArgs(obj);
 
-    console.log(`Captured event: \x1b[32m ${obj.event} \x1b[0m`, eventArgsObj);
+    console.log(`Captured event: ${chalk.green(obj.event)}`, eventArgsObj);
 
     // handle the Sent event, process automatic claim if applicable
     if (obj.event === "Sent") {
@@ -65,16 +93,16 @@ export class DeBridgeEmulator {
 
   private async tryClaim(sentEvent: SentEvent) {
     console.log(
-      `📣 Captured submission: \x1b[31m ${sentEvent.args.submissionId} \x1b[0m`
+      `📣 Captured submission: ${chalk.red(sentEvent.args.submissionId)}`
     );
 
     const autoParams = parseAutoParamsTo(sentEvent);
 
     if (autoParams.executionFee.lt(this.opts.minExFee)) {
       console.log(
-        `[SubmissionId: \x1b[31m${
+        `[SubmissionId: ${chalk.red(
           sentEvent.args.submissionId
-        }\x1b[0m] Broadcasted execution fee (${autoParams.executionFee.toString()}) is less than minimum (${this.opts.minExFee.toString()}), skipping automatic claim`
+        )}] Broadcasted execution fee (${autoParams.executionFee.toString()}) is less than minimum (${this.opts.minExFee.toString()}), skipping automatic claim`
       );
       return;
     }
