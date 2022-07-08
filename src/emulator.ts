@@ -87,28 +87,36 @@ export class DeBridgeEmulator {
 
     // handle the Sent event, process automatic claim if applicable
     if (obj.event === "Sent") {
-      await this.tryClaim(obj as SentEvent);
+      console.log(
+        `📣 Captured submission: ${chalk.red(
+          (obj as SentEvent).args.submissionId
+        )}`
+      );
+
+      if (this.opts.autoClaim) {
+        await this.tryClaim(obj as SentEvent);
+      } else {
+        console.warn("Automatic claiming is disabled");
+      }
     }
   }
 
   private async tryClaim(sentEvent: SentEvent) {
-    console.log(
-      `📣 Captured submission: ${chalk.red(sentEvent.args.submissionId)}`
-    );
-
     const autoParams = parseAutoParamsTo(sentEvent);
 
     if (autoParams.executionFee.lt(this.opts.minExFee)) {
       console.log(
         `[SubmissionId: ${chalk.red(
           sentEvent.args.submissionId
-        )}] Broadcasted execution fee (${autoParams.executionFee.toString()}) is less than minimum (${this.opts.minExFee.toString()}), skipping automatic claim`
+        )}] Included execution fee (${autoParams.executionFee.toString()}) is less than the given minimum (${this.opts.minExFee.toString()}), skipping automatic claim`
       );
       return;
     }
 
     console.log(
-      `[SubmissionId: \x1b[31m${sentEvent.args.submissionId}\x1b[0m] Signing and broadcasting a claim txn`
+      `[SubmissionId: ${chalk.red(
+        sentEvent.args.submissionId
+      )}] Signing and broadcasting a txn to claim the submission`
     );
 
     try {
@@ -125,12 +133,20 @@ export class DeBridgeEmulator {
         }
       );
 
-      await claimTx.wait();
+      const rcp = await claimTx.wait();
+
+      console.log(
+        `[SubmissionId: ${chalk.red(
+          sentEvent.args.submissionId
+        )}] Claim txn has been included: ${rcp.transactionHash}`
+      );
     } catch (e) {
       const txHash = (e as any)?.data?.txHash as string;
       const errMessage = (e as any)?.data?.message || e;
       console.error(
-        `[SubmissionId: \x1b[31m${sentEvent.args.submissionId}\x1b[0m] Claim txn failed: ${errMessage}`,
+        `[SubmissionId: ${chalk.red(
+          sentEvent.args.submissionId
+        )}] Claim txn failed: ${errMessage}`,
         txHash
       );
     }
