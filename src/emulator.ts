@@ -83,12 +83,12 @@ export class DeBridgeEmulator {
     // To make a cleaner output, we leave only object properties
     const eventArgsObj = this.unwindEventArgs(obj);
 
-    console.log(`Captured event: ${chalk.green(obj.event)}`, eventArgsObj);
+    console.log(`[Txn: ${obj.transactionHash}] Captured event: ${chalk.green(obj.event)}`, eventArgsObj);
 
     // handle the Sent event, process automatic claim if applicable
     if (obj.event === "Sent") {
       console.log(
-        `📣 Captured submission: ${chalk.red(
+        `[Txn: ${obj.transactionHash}] Captured submission: ${chalk.red(
           (obj as SentEvent).args.submissionId
         )}`
       );
