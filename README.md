@@ -2,6 +2,8 @@
 
 **Easily test your integrations with [deBridge](https://debridge.finance).** A plugin for [Hardhat](https://hardhat.org) provides the toolkit to test and emulate dApps built on top of deBridge protocol.
 
+![deBridge emulator schema](Schema.png)
+
 ## Rationale
 
 [deBridge](https://debridge.finance) is a generic messaging and cross-chain interoperability protocol that enables decentralized transfers of arbitrary data and assets between various blockchains. Given the complexity of the protocol itself and the number of different components involved in the flow, **integration development** and its sufficient **unit testing** may by very tricky as it typically requires a complete infrastructure setup.
@@ -69,7 +71,7 @@ describe("Test Suite #1", function () {
         // asking it to broadcast a message. A message is an instruction to call
         // the callee contract. A call may contain arbitrary values, if the callee
         // contract's ABI is expects them.
-        await senderContractChainA.sendValueToChainB(senderContractChainA.VALUE_1, {
+        await senderContractChainA.sendValue(senderContractChainA.VALUE_1, {
             value: await gate.globalFixedNativeFee()
         });
 
