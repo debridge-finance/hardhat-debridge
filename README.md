@@ -113,3 +113,7 @@ DeBridge emulator is waiting for events...
 3. In the third terminal, deploy your sender and receiver contracts to the same local node. Of course, these contracts are intended to reside on different chains, but for emulation purposes we use a loopback bridge, which assumes sender and receiver are on the same chain still communicating though the `deBridgeGate` contract.
 
 Start calling your sender contract: you'll see transactions being printed in the first terminal while messages coming to the `deBridgeGate` contract being captured and bridged back in the second terminal.
+
+## Questions?
+
+Welcome to the [`#developers-chat`](https://discord.com/channels/875308315700264970/876748142777864202) at the deBridge Discord server.
