@@ -1,14 +1,15 @@
+
+import { Submission, Context as EVMContext, DummySignatureStorage, SendAutoParams, ClaimAutoParams } from "@debridge-finance/desdk/lib/evm";
 import chalk from "chalk";
 import { BigNumber, Event, utils } from "ethers";
-
 import { DeBridgeGate } from "../typechain";
-import { ClaimedEvent, SentEvent } from "../typechain/DeBridgeGate";
+import {
+  SentEvent,
+  ClaimedEvent,
+} from "../typechain/@debridge-finance/contracts/contracts/interfaces/IDeBridgeGate";
 
 import {
   collapseArgs,
-  convertSentAutoParamsToClaimAutoParams,
-  parseAutoParamsFrom,
-  parseAutoParamsTo,
 } from "./utils";
 
 interface DeBridgeEmulatorOpts {
@@ -22,10 +23,18 @@ const DEFAULT_OPTS: DeBridgeEmulatorOpts = {
 };
 
 export class DeBridgeEmulator {
+  private evmCtx: EVMContext;
+
   constructor(
     private gate: DeBridgeGate,
     private opts: DeBridgeEmulatorOpts = DEFAULT_OPTS
   ) {
+    this.evmCtx = {
+      provider: this.gate.provider,
+      deBridgeGateAddress: this.gate.address,
+      signatureStorage: new DummySignatureStorage()
+    };
+
     console.info("DeBridge emulator is starting...");
     if (opts.autoClaim) {
       console.info(
@@ -60,10 +69,10 @@ export class DeBridgeEmulator {
 
     if (event.event === "Sent") {
       eventArgsObj.feeParams = collapseArgs(eventArgsObj.feeParams);
-      eventArgsObj.autoParams = parseAutoParamsTo(event as SentEvent);
+      eventArgsObj.autoParams = collapseArgs(SendAutoParams.decode(event.args.autoParams));
       eventArgsObj.autoParams.flags = eventArgsObj.autoParams.flags.toHumanReadableString();
     } else if (event.event === "Claimed") {
-      eventArgsObj.autoParams = parseAutoParamsFrom(event as ClaimedEvent);
+      eventArgsObj.autoParams = collapseArgs(ClaimAutoParams.decode(event.args.autoParams));
       eventArgsObj.autoParams.flags = eventArgsObj.autoParams.flags.toHumanReadableString();
     }
 
@@ -102,32 +111,29 @@ export class DeBridgeEmulator {
   }
 
   private async tryClaim(sentEvent: SentEvent) {
-    const autoParams = parseAutoParamsTo(sentEvent);
+    const submission = await Submission.find(sentEvent.transactionHash, sentEvent.args.submissionId, this.evmCtx)
+    if (!submission) throw new Error("Unexpected: submission not found")
 
-    if (autoParams.executionFee.lt(this.opts.minExFee)) {
+    if (submission.autoParams.executionFee.lt(this.opts.minExFee)) {
       console.log(
         `[SubmissionId: ${chalk.red(
-          sentEvent.args.submissionId
-        )}] Included execution fee (${autoParams.executionFee.toString()}) is less than the given minimum (${this.opts.minExFee.toString()}), skipping automatic claim`
+          submission.submissionId
+        )}] Included execution fee (${submission.autoParams.executionFee.toString()}) is less than the given minimum (${this.opts.minExFee.toString()}), skipping automatic claim`
       );
       return;
     }
 
     console.log(
       `[SubmissionId: ${chalk.red(
-        sentEvent.args.submissionId
+        submission.submissionId
       )}] Signing and broadcasting a txn to claim the submission`
     );
 
     try {
+      const claim = await submission.toEVMClaim(this.evmCtx)
+      const args = await claim.getClaimArgs();
       const claimTx = await this.gate.claim(
-        sentEvent.args.debridgeId,
-        sentEvent.args.amount,
-        (await this.gate.provider.getNetwork()).chainId,
-        sentEvent.args.receiver,
-        sentEvent.args.nonce,
-        "0x123456", // signatureVerifier is mocked, accepts arbitrary data
-        convertSentAutoParamsToClaimAutoParams(sentEvent),
+        ...args,
         {
           gasLimit: 8_000_000,
         }
@@ -137,7 +143,7 @@ export class DeBridgeEmulator {
 
       console.log(
         `[SubmissionId: ${chalk.red(
-          sentEvent.args.submissionId
+          submission.submissionId
         )}] Claim txn has been included: ${rcp.transactionHash}`
       );
     } catch (e) {
@@ -145,7 +151,7 @@ export class DeBridgeEmulator {
       const errMessage = (e as any)?.data?.message || e;
       console.error(
         `[SubmissionId: ${chalk.red(
-          sentEvent.args.submissionId
+          submission.submissionId
         )}] Claim txn failed: ${errMessage}`,
         txHash
       );

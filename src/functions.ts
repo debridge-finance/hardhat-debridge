@@ -1,3 +1,4 @@
+import { Context, DummySignatureStorage, Submission } from "@debridge-finance/desdk/lib/evm";
 import { deployMockContract } from "ethereum-waffle";
 import {
   BigNumber,
@@ -5,7 +6,6 @@ import {
   ContractTransaction,
   Overrides,
 } from "ethers";
-import { defaultAbiCoder } from "ethers/lib/utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import {
@@ -14,10 +14,9 @@ import {
   MockWeth,
   MockWeth__factory,
 } from "../typechain";
-import { SentEvent } from "../typechain/IDeBridgeGate";
-
-import { SubmissionAutoParamsFrom, SubmissionAutoParamsTo } from "./structs";
-import { convertSentAutoParamsToClaimAutoParams } from "./utils";
+import {
+  SentEvent,
+} from "../typechain/@debridge-finance/contracts/contracts/interfaces/IDeBridgeGate";
 
 function _check(hre: HardhatRuntimeEnvironment) {
   if (!["hardhat", "localhost"].includes(hre.network.name)) {
@@ -142,7 +141,7 @@ export function makeAutoClaimFunction(
 ): AutoClaimFunction {
   _check(hre);
 
-  return async function makeAutoClaim(
+  return async function autoClaim(
     opts: GetClaimArgsOpts = {},
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction> {
@@ -151,8 +150,9 @@ export function makeAutoClaimFunction(
       throw new Error("DeBridgeGate not yet deployed");
     }
 
+    const args = await hre.deBridge.emulator.getClaimArgs(opts, overrides);
     return opts.gate.claim(
-      ...(await hre.deBridge.emulator.getClaimArgs(opts, overrides))
+      ...args
     );
   };
 }
@@ -161,18 +161,38 @@ export function makeAutoClaimFunction(
 // getClaimArgs
 //
 
-type ClaimArgs = Parameters<DeBridgeGate["claim"]>;
+type ClaimArgs = Parameters<DeBridgeGate["claim"]>
 
 interface GetClaimArgsOpts {
   gate?: DeBridgeGate;
-  sendTransactionReceipt?: ContractReceipt;
-  sentEvent?: SentEvent;
+  txHash?: string;
 }
 
 export type GetClaimArgsFunction = (
   opts?: GetClaimArgsOpts,
   overrides?: Overrides & { from?: string | Promise<string> }
 ) => Promise<ClaimArgs>;
+
+async function getSubmission(txHash: string, ctx: Context): Promise<Submission | undefined> {
+  const submissions = await Submission.findAll(txHash, ctx)
+  if (submissions.length > 0) return submissions[0];
+}
+
+async function findLastSubmission(gate: DeBridgeGate, ctx: Context): Promise<Submission | undefined> {
+    // find the last Sent() event emitted
+    const sentEvent =
+      (await gate.queryFilter(gate.filters.Sent()))
+        .reverse()[0];
+
+    if (!sentEvent)
+      throw new Error("Sent() event not found");
+
+    return Submission.find(
+      sentEvent.transactionHash,
+      sentEvent.args.submissionId,
+      ctx
+    );
+}
 
 export function makeGetClaimArgs(
   hre: HardhatRuntimeEnvironment
@@ -183,33 +203,28 @@ export function makeGetClaimArgs(
     opts: GetClaimArgsOpts = {},
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ClaimArgs> {
-    opts.gate = opts.gate || STATE.currentGate;
-    if (!opts.gate) {
+    const gate = opts.gate || STATE.currentGate;
+    if (!gate) {
       throw new Error("DeBridgeGate not yet deployed");
     }
 
-    // find the last Sent() event emitted
-    const sentEvent =
-      opts.sentEvent ||
-      (await opts.gate.queryFilter(opts.gate.filters.Sent()))
-        .reverse()
-        .find((ev) =>
-          opts.sendTransactionReceipt
-            ? ev.transactionHash === opts.sendTransactionReceipt.transactionHash
-            : true
-        );
-    if (!sentEvent) {
-      throw new Error("Sent() event not found");
-    }
+    const ctx = {
+      deBridgeGateAddress: gate.address,
+      provider: gate.provider,
+      signatureStorage: new DummySignatureStorage()
+    };
+    const submission = opts.txHash
+      ? await getSubmission(opts.txHash, ctx)
+      : await findLastSubmission(gate, ctx)
+
+    if (!submission)
+      throw new Error("Unexpected: submission not found")
+
+    const claim = await submission.toEVMClaim(ctx);
+    const args = await claim.getClaimArgs();
 
     return [
-      sentEvent.args.debridgeId,
-      sentEvent.args.amount,
-      hre.ethers.provider.network.chainId,
-      sentEvent.args.receiver,
-      sentEvent.args.nonce,
-      "0x123456",
-      convertSentAutoParamsToClaimAutoParams(sentEvent),
+      ...args,
       overrides || {},
     ];
   };

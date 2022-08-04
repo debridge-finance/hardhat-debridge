@@ -13,4 +13,7 @@ module.exports = {
       allowUnlimitedContractSize: true,
     }
   },
+  typechain: {
+    outDir: "typechain"
+  }
 };
