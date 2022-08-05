@@ -1,11 +1,9 @@
 import {
-  Claim,
   Context,
   DummySignatureStorage,
   Submission,
 } from "@debridge-finance/desdk/lib/evm";
 import { deployMockContract } from "ethereum-waffle";
-import { BigNumber } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import {

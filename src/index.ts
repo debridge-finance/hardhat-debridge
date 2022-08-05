@@ -44,7 +44,7 @@ extendEnvironment((hre) => {
 task(
   TASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT,
   "Deploys deBridgeGate emulator contract with pre-configured defaults"
-).setAction(async (args, hre) => {
+).setAction(async (_, hre) => {
   const gate = await hre.deBridge.emulator.deployGate();
 
   console.log(

@@ -237,10 +237,6 @@ describe("Check emulator functions", function () {
           value: this.contracts.gateProtocolFee,
         });
         this.tx = await tx.wait();
-        const submissions = await Submission.findAll(
-          this.tx.transactionHash,
-          this.evmContext
-        );
       });
 
       before(async function () {
@@ -264,9 +260,7 @@ describe("Check emulator functions", function () {
       });
 
       it("Must claim all submissions", async function () {
-        const submissionIds = await this.hre.deBridge.emulator.autoClaim({
-          // txHash: this.tx.transactionHash
-        });
+        const submissionIds = await this.hre.deBridge.emulator.autoClaim();
 
         expect(1).to.be.eq(submissionIds.length);
         const currentValue = await this.contracts.counter.counter();
