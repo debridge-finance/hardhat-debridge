@@ -1,5 +1,5 @@
-require("@typechain/hardhat")
-require ("../../../src/index");
+require("@typechain/hardhat");
+require("../../../src/index");
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -10,9 +10,9 @@ module.exports = {
   networks: {
     hardhat: {
       allowUnlimitedContractSize: true,
-    }
+    },
   },
   typechain: {
-    outDir: require("path").join(__dirname, "typechain")
-  }
+    outDir: require("path").join(__dirname, "typechain"),
+  },
 };

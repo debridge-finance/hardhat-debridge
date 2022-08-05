@@ -1,8 +1,11 @@
-import { Claim, Context, DummySignatureStorage, Submission } from "@debridge-finance/desdk/lib/evm";
-import { deployMockContract } from "ethereum-waffle";
 import {
-  BigNumber,
-} from "ethers";
+  Claim,
+  Context,
+  DummySignatureStorage,
+  Submission,
+} from "@debridge-finance/desdk/lib/evm";
+import { deployMockContract } from "ethereum-waffle";
+import { BigNumber } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import {
@@ -12,6 +15,7 @@ import {
   MockWeth__factory,
 } from "../typechain";
 import { SentEvent } from "../typechain/@debridge-finance/contracts/contracts/interfaces/IDeBridgeGate";
+
 import { getRandom } from "./utils";
 
 function _check(hre: HardhatRuntimeEnvironment) {
@@ -26,13 +30,13 @@ function _check(hre: HardhatRuntimeEnvironment) {
 
 interface InternalEmulatorState {
   currentGate?: DeBridgeGate;
-  submissions: { [key: string]: Submission },
-  latestScannedBlock: number
+  submissions: { [key: string]: Submission };
+  latestScannedBlock: number;
 }
 
 const STATE: InternalEmulatorState = {
   submissions: {},
-  latestScannedBlock: 0
+  latestScannedBlock: 0,
 };
 
 //
@@ -129,7 +133,7 @@ interface EmulatorClaimContext {
 }
 
 export type AutoClaimFunction = (
-  ctx?: EmulatorClaimContext,
+  ctx?: EmulatorClaimContext
 ) => Promise<string[]>;
 
 export function makeAutoClaimFunction(
@@ -138,7 +142,7 @@ export function makeAutoClaimFunction(
   _check(hre);
 
   return async function autoClaim(
-    claimContext: EmulatorClaimContext = {},
+    claimContext: EmulatorClaimContext = {}
   ): Promise<string[]> {
     const gate = claimContext.gate || STATE.currentGate;
     if (!gate) {
@@ -148,7 +152,7 @@ export function makeAutoClaimFunction(
     const evmContext = {
       deBridgeGateAddress: gate.address,
       provider: gate.provider,
-      signatureStorage: new DummySignatureStorage()
+      signatureStorage: new DummySignatureStorage(),
     };
 
     // pull all submissions (either from specific tx or from all recent blocks)
@@ -156,7 +160,7 @@ export function makeAutoClaimFunction(
       ? await getSubmissions(claimContext.txHash, evmContext)
       : await pullSubmissions(gate, evmContext);
 
-      // find those that were not tracked yet
+    // find those that were not tracked yet
     const claims = await Promise.all(
       submissions.map(async (submission) => submission.toEVMClaim(evmContext))
     );
@@ -165,34 +169,45 @@ export function makeAutoClaimFunction(
     );
 
     // find out which submissions must be claimed
-    const claimsToExecute = claims.filter((_, k) => submissionStates[k] === false)
+    const claimsToExecute = claims.filter(
+      (_, k) => submissionStates[k] === false
+    );
 
     // claim them all
     return Promise.all(
       claimsToExecute.map(async (claim) => {
-        const args = await claim.getClaimArgs()
+        const args = await claim.getClaimArgs();
         await gate.claim(...args);
-        return claim.submissionId.toString()
+        return claim.submissionId.toString();
       })
-    )
+    );
   };
 }
 
-async function getSubmissions(txHash: string, ctx: Context): Promise<Submission[]> {
-  return await Submission.findAll(txHash, ctx)
+async function getSubmissions(
+  txHash: string,
+  ctx: Context
+): Promise<Submission[]> {
+  return Submission.findAll(txHash, ctx);
 }
 
-async function pullSubmissions(gate: DeBridgeGate, ctx: Context): Promise<Submission[]> {
-  const events = await gate.queryFilter(gate.filters.Sent(), STATE.latestScannedBlock);
+async function pullSubmissions(
+  gate: DeBridgeGate,
+  ctx: Context
+): Promise<Submission[]> {
+  const events = await gate.queryFilter(
+    gate.filters.Sent(),
+    STATE.latestScannedBlock
+  );
   if (events.length) {
     STATE.latestScannedBlock = events[events.length - 1].blockNumber - 1;
   }
   return Promise.all(
-    events
-      .map(async (s: SentEvent): Promise<Submission> => Submission.find(
-        s.transactionHash,
-        s.args.submissionId,
-        ctx
-      ) as Promise<Submission>)
+    events.map(
+      async (s: SentEvent): Promise<Submission> =>
+        Submission.find(s.transactionHash, s.args.submissionId, ctx) as Promise<
+          Submission
+        >
+    )
   );
 }

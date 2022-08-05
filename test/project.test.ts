@@ -1,14 +1,20 @@
 // tslint:disable-next-line no-implicit-dependencies
-import { DummySignatureStorage, Flag, Flags, SendAutoParams, Submission } from "@debridge-finance/desdk/lib/evm";
+import {
+  DummySignatureStorage,
+  Flag,
+  Flags,
+  SendAutoParams,
+  Submission,
+} from "@debridge-finance/desdk/lib/evm";
 import { assert, expect } from "chai";
 import { BigNumber, ethers } from "ethers";
 import { parseEther } from "ethers/lib/utils";
+
 import { deployContracts, useEnvironment } from "./helpers";
 
 describe("Integration tests examples", function () {
   useEnvironment("hardhat-debridge-test-env");
   describe("Hardhat Runtime Environment extension", function () {
-
     it("Should add the example field", async function () {
       assert.isObject(this.hre.deBridge);
     });
@@ -22,13 +28,13 @@ describe("Check emulator functions", function () {
     it("Should transfer", async function () {
       const gate = await this.hre.deBridge.emulator.deployGate();
       const fee = await gate.globalFixedNativeFee();
-      const transferAmount = parseEther('1')
+      const transferAmount = parseEther("1");
 
       const [, receiver] = await this.hre.ethers.getSigners();
       const receiverAmountBefore = await receiver.getBalance();
-      const expectedAmount =
-        receiverAmountBefore
-        .add(transferAmount.mul(10000 - 10).div(10000));
+      const expectedAmount = receiverAmountBefore.add(
+        transferAmount.mul(10000 - 10).div(10000)
+      );
 
       const txSend = await gate.send(
         ethers.constants.AddressZero,
@@ -39,24 +45,22 @@ describe("Check emulator functions", function () {
         true,
         0,
         new SendAutoParams({
-          executionFee: BigNumber.from('0'),
+          executionFee: BigNumber.from("0"),
           fallbackAddress: receiver.address,
           flags: new Flags(Flag.UNWRAP_ETH), // expect to receive native ether
-          data: "0x"
+          data: "0x",
         }).encode(),
         { value: transferAmount.add(fee) }
       );
       await txSend.wait();
 
       const submissionIds = await this.hre.deBridge.emulator.autoClaim();
-      expect(submissionIds.length)
-        .to.be.eq(1);
+      expect(submissionIds.length).to.be.eq(1);
 
       const receiverAmountAfter = await receiver.getBalance();
-      expect(receiverAmountAfter.eq(expectedAmount))
-        .to.equal(true)
-    })
-  })
+      expect(receiverAmountAfter.eq(expectedAmount)).to.equal(true);
+    });
+  });
 
   describe("Checking autoClaim", function () {
     const INCREMENT_BY = 10;
@@ -67,7 +71,7 @@ describe("Check emulator functions", function () {
         this.evmContext = {
           provider: this.hre,
           deBridgeGateAddress: this.contracts.gate.address,
-          signatureStorage: new DummySignatureStorage,
+          signatureStorage: new DummySignatureStorage(),
         };
       });
 
@@ -76,7 +80,7 @@ describe("Check emulator functions", function () {
           value: this.contracts.gateProtocolFee,
         });
         this.tx = await tx.wait();
-      })
+      });
 
       it("Must capture one submission", async function () {
         const submissions = await Submission.findAll(
@@ -88,14 +92,14 @@ describe("Check emulator functions", function () {
       });
 
       it("Must claim", async function () {
-        const submissionIds = await this.hre.deBridge.emulator.autoClaim()
+        const submissionIds = await this.hre.deBridge.emulator.autoClaim();
 
         expect(1).to.be.eq(submissionIds.length);
 
         const currentValue = await this.contracts.counter.counter();
         expect(currentValue.eq(INCREMENT_BY)).to.be.eq(true);
       });
-    })
+    });
 
     describe("Checking autoClaim for multiple submissions", function () {
       before(async function () {
@@ -103,7 +107,7 @@ describe("Check emulator functions", function () {
         this.evmContext = {
           provider: this.hre,
           deBridgeGateAddress: this.contracts.gate.address,
-          signatureStorage: new DummySignatureStorage,
+          signatureStorage: new DummySignatureStorage(),
         };
       });
 
@@ -111,11 +115,11 @@ describe("Check emulator functions", function () {
         const tx = await this.contracts.incrementor.incrementMulti(
           [INCREMENT_BY, INCREMENT_BY * 2, INCREMENT_BY * 3],
           {
-            value: this.contracts.gateProtocolFee.mul(3)
+            value: this.contracts.gateProtocolFee.mul(3),
           }
         );
         this.tx = await tx.wait();
-      })
+      });
 
       it("Must capture multiple submissions", async function () {
         const submissions = await Submission.findAll(
@@ -127,16 +131,16 @@ describe("Check emulator functions", function () {
       });
 
       it("Must claim all submissions", async function () {
-        const submissionIds = await this.hre.deBridge.emulator.autoClaim()
+        const submissionIds = await this.hre.deBridge.emulator.autoClaim();
 
         expect(3).to.be.eq(submissionIds.length);
 
         const currentValue = await this.contracts.counter.counter();
-        const expectedValue = INCREMENT_BY + INCREMENT_BY * 2 + INCREMENT_BY * 3
-        expect(currentValue.eq(expectedValue))
-          .to.be.eq(true);
+        const expectedValue =
+          INCREMENT_BY + INCREMENT_BY * 2 + INCREMENT_BY * 3;
+        expect(currentValue.eq(expectedValue)).to.be.eq(true);
       });
-    })
+    });
 
     describe("Checking autoClaim for multiple submissions (partially claimed)", function () {
       before(async function () {
@@ -144,7 +148,7 @@ describe("Check emulator functions", function () {
         this.evmContext = {
           provider: this.hre,
           deBridgeGateAddress: this.contracts.gate.address,
-          signatureStorage: new DummySignatureStorage,
+          signatureStorage: new DummySignatureStorage(),
         };
       });
 
@@ -152,11 +156,11 @@ describe("Check emulator functions", function () {
         const tx = await this.contracts.incrementor.incrementMulti(
           [INCREMENT_BY, INCREMENT_BY * 2, INCREMENT_BY * 3],
           {
-            value: this.contracts.gateProtocolFee.mul(3)
+            value: this.contracts.gateProtocolFee.mul(3),
           }
         );
         this.tx = await tx.wait();
-      })
+      });
 
       it("Must capture multiple submissions", async function () {
         const submissions = await Submission.findAll(
@@ -168,19 +172,20 @@ describe("Check emulator functions", function () {
 
         // claim second submission explicitly
         const claim = await submissions[1].toEVMClaim(this.evmContext);
-        const args = await claim.getClaimArgs()
+        const args = await claim.getClaimArgs();
         await this.contracts.gate.claim(...args);
       });
 
       it("Must claim submissions #0 and #2", async function () {
-        const submissionIds = await this.hre.deBridge.emulator.autoClaim()
+        const submissionIds = await this.hre.deBridge.emulator.autoClaim();
 
         expect(2).to.be.eq(submissionIds.length);
         const currentValue = await this.contracts.counter.counter();
-        const expectedValue = INCREMENT_BY + INCREMENT_BY * 2 + INCREMENT_BY * 3
+        const expectedValue =
+          INCREMENT_BY + INCREMENT_BY * 2 + INCREMENT_BY * 3;
         expect(currentValue.eq(expectedValue)).to.be.eq(true);
       });
-    })
+    });
 
     describe("Checking autoClaim for multiple txns", function () {
       before(async function () {
@@ -188,38 +193,34 @@ describe("Check emulator functions", function () {
         this.evmContext = {
           provider: this.hre,
           deBridgeGateAddress: this.contracts.gate.address,
-          signatureStorage: new DummySignatureStorage,
+          signatureStorage: new DummySignatureStorage(),
         };
       });
 
       before(async function () {
-        const tx = await this.contracts.incrementor.increment(
-          INCREMENT_BY,
-          {
-            value: this.contracts.gateProtocolFee
-          }
-        );
+        const tx = await this.contracts.incrementor.increment(INCREMENT_BY, {
+          value: this.contracts.gateProtocolFee,
+        });
         this.tx = await tx.wait();
-
 
         const tx2 = await this.contracts.incrementor.increment(
           INCREMENT_BY * 2,
           {
-            value: this.contracts.gateProtocolFee
+            value: this.contracts.gateProtocolFee,
           }
         );
         await tx2.wait();
-      })
+      });
 
       it("Must claim all submissions", async function () {
-        const submissionIds = await this.hre.deBridge.emulator.autoClaim()
+        const submissionIds = await this.hre.deBridge.emulator.autoClaim();
 
         expect(2).to.be.eq(submissionIds.length);
         const currentValue = await this.contracts.counter.counter();
-        const expectedValue = INCREMENT_BY + INCREMENT_BY * 2
+        const expectedValue = INCREMENT_BY + INCREMENT_BY * 2;
         expect(currentValue.eq(expectedValue)).to.be.eq(true);
       });
-    })
+    });
 
     describe("Checking autoClaim for multiple txns (partially claimed)", function () {
       before(async function () {
@@ -227,29 +228,26 @@ describe("Check emulator functions", function () {
         this.evmContext = {
           provider: this.hre,
           deBridgeGateAddress: this.contracts.gate.address,
-          signatureStorage: new DummySignatureStorage,
+          signatureStorage: new DummySignatureStorage(),
         };
       });
 
       before(async function () {
-        const tx = await this.contracts.incrementor.increment(
-          INCREMENT_BY,
-          {
-            value: this.contracts.gateProtocolFee
-          }
-        );
+        const tx = await this.contracts.incrementor.increment(INCREMENT_BY, {
+          value: this.contracts.gateProtocolFee,
+        });
         this.tx = await tx.wait();
         const submissions = await Submission.findAll(
           this.tx.transactionHash,
           this.evmContext
         );
-      })
+      });
 
       before(async function () {
         const tx2 = await this.contracts.incrementor.increment(
           INCREMENT_BY * 2,
           {
-            value: this.contracts.gateProtocolFee
+            value: this.contracts.gateProtocolFee,
           }
         );
         const tx2Receipt = await tx2.wait();
@@ -263,18 +261,18 @@ describe("Check emulator functions", function () {
         const claim = await submissions[0].toEVMClaim(this.evmContext);
         const args = await claim.getClaimArgs();
         await this.contracts.gate.claim(...args);
-      })
+      });
 
       it("Must claim all submissions", async function () {
         const submissionIds = await this.hre.deBridge.emulator.autoClaim({
           // txHash: this.tx.transactionHash
-        })
+        });
 
         expect(1).to.be.eq(submissionIds.length);
         const currentValue = await this.contracts.counter.counter();
-        const expectedValue = INCREMENT_BY + INCREMENT_BY * 2
+        const expectedValue = INCREMENT_BY + INCREMENT_BY * 2;
         expect(currentValue.eq(expectedValue)).to.be.eq(true);
       });
-    })
+    });
   });
-})
+});

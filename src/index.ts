@@ -9,10 +9,7 @@ import { extendEnvironment, subtask, task } from "hardhat/config";
 import { lazyObject } from "hardhat/plugins";
 
 import { DeBridgeEmulator } from "./emulator";
-import {
-  AutoClaimFunction,
-  DeployDebridgeGateFunction,
-} from "./functions";
+import { AutoClaimFunction, DeployDebridgeGateFunction } from "./functions";
 import "./type-extensions";
 
 const TASK_DEBRIDGE_DEPLOY_EMULATOR_CONTRACT =
@@ -32,10 +29,7 @@ export interface DeBridge {
 extendEnvironment((hre) => {
   hre.deBridge = lazyObject(
     (): DeBridge => {
-      const {
-        makeDeployGate,
-        makeAutoClaimFunction,
-      } = require("./functions");
+      const { makeDeployGate, makeAutoClaimFunction } = require("./functions");
 
       return {
         emulator: {

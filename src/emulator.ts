@@ -1,16 +1,20 @@
-
-import { Submission, Context as EVMContext, DummySignatureStorage, SendAutoParams, ClaimAutoParams } from "@debridge-finance/desdk/lib/evm";
+import {
+  ClaimAutoParams,
+  Context as EVMContext,
+  DummySignatureStorage,
+  SendAutoParams,
+  Submission,
+} from "@debridge-finance/desdk/lib/evm";
 import chalk from "chalk";
 import { BigNumber, Event, utils } from "ethers";
+
 import { DeBridgeGate } from "../typechain";
 import {
-  SentEvent,
   ClaimedEvent,
+  SentEvent,
 } from "../typechain/@debridge-finance/contracts/contracts/interfaces/IDeBridgeGate";
 
-import {
-  collapseArgs,
-} from "./utils";
+import { collapseArgs } from "./utils";
 
 interface DeBridgeEmulatorOpts {
   minExFee: BigNumber;
@@ -32,7 +36,7 @@ export class DeBridgeEmulator {
     this.evmCtx = {
       provider: this.gate.provider,
       deBridgeGateAddress: this.gate.address,
-      signatureStorage: new DummySignatureStorage()
+      signatureStorage: new DummySignatureStorage(),
     };
 
     console.info("DeBridge emulator is starting...");
@@ -69,10 +73,14 @@ export class DeBridgeEmulator {
 
     if (event.event === "Sent") {
       eventArgsObj.feeParams = collapseArgs(eventArgsObj.feeParams);
-      eventArgsObj.autoParams = collapseArgs(SendAutoParams.decode(event.args.autoParams));
+      eventArgsObj.autoParams = collapseArgs(
+        SendAutoParams.decode(event.args.autoParams)
+      );
       eventArgsObj.autoParams.flags = eventArgsObj.autoParams.flags.toHumanReadableString();
     } else if (event.event === "Claimed") {
-      eventArgsObj.autoParams = collapseArgs(ClaimAutoParams.decode(event.args.autoParams));
+      eventArgsObj.autoParams = collapseArgs(
+        ClaimAutoParams.decode(event.args.autoParams)
+      );
       eventArgsObj.autoParams.flags = eventArgsObj.autoParams.flags.toHumanReadableString();
     }
 
@@ -92,7 +100,10 @@ export class DeBridgeEmulator {
     // To make a cleaner output, we leave only object properties
     const eventArgsObj = this.unwindEventArgs(obj);
 
-    console.log(`[Txn: ${obj.transactionHash}] Captured event: ${chalk.green(obj.event)}`, eventArgsObj);
+    console.log(
+      `[Txn: ${obj.transactionHash}] Captured event: ${chalk.green(obj.event)}`,
+      eventArgsObj
+    );
 
     // handle the Sent event, process automatic claim if applicable
     if (obj.event === "Sent") {
@@ -111,8 +122,14 @@ export class DeBridgeEmulator {
   }
 
   private async tryClaim(sentEvent: SentEvent) {
-    const submission = await Submission.find(sentEvent.transactionHash, sentEvent.args.submissionId, this.evmCtx)
-    if (!submission) throw new Error("Unexpected: submission not found")
+    const submission = await Submission.find(
+      sentEvent.transactionHash,
+      sentEvent.args.submissionId,
+      this.evmCtx
+    );
+    if (!submission) {
+      throw new Error("Unexpected: submission not found");
+    }
 
     const exFee = BigNumber.from(submission.autoParams.executionFee);
     if (exFee.lt(this.opts.minExFee)) {
@@ -131,14 +148,11 @@ export class DeBridgeEmulator {
     );
 
     try {
-      const claim = await submission.toEVMClaim(this.evmCtx)
+      const claim = await submission.toEVMClaim(this.evmCtx);
       const args = await claim.getClaimArgs();
-      const claimTx = await this.gate.claim(
-        ...args,
-        {
-          gasLimit: 8_000_000,
-        }
-      );
+      const claimTx = await this.gate.claim(...args, {
+        gasLimit: 8_000_000,
+      });
 
       const rcp = await claimTx.wait();
 
