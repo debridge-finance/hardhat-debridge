@@ -1,10 +1,7 @@
-import { Context, DummySignatureStorage, Submission } from "@debridge-finance/desdk/lib/evm";
+import { Claim, Context, DummySignatureStorage, Submission } from "@debridge-finance/desdk/lib/evm";
 import { deployMockContract } from "ethereum-waffle";
 import {
   BigNumber,
-  ContractReceipt,
-  ContractTransaction,
-  Overrides,
 } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -14,9 +11,8 @@ import {
   MockWeth,
   MockWeth__factory,
 } from "../typechain";
-import {
-  SentEvent,
-} from "../typechain/@debridge-finance/contracts/contracts/interfaces/IDeBridgeGate";
+import { SentEvent } from "../typechain/@debridge-finance/contracts/contracts/interfaces/IDeBridgeGate";
+import { getRandom } from "./utils";
 
 function _check(hre: HardhatRuntimeEnvironment) {
   if (!["hardhat", "localhost"].includes(hre.network.name)) {
@@ -30,24 +26,20 @@ function _check(hre: HardhatRuntimeEnvironment) {
 
 interface InternalEmulatorState {
   currentGate?: DeBridgeGate;
+  submissions: { [key: string]: Submission },
+  latestScannedBlock: number
 }
 
-const STATE: InternalEmulatorState = {};
+const STATE: InternalEmulatorState = {
+  submissions: {},
+  latestScannedBlock: 0
+};
 
 //
 // deployGate
 //
 
 export type DeployDebridgeGateFunction = () => Promise<DeBridgeGate>;
-
-function getRandom(min: number, max: number, decimals = 18) {
-  const denominator = 4;
-  min *= 10 ** denominator;
-  max *= 10 ** denominator;
-  decimals -= denominator;
-  const v = Math.floor(Math.random() * (max - min + 1) + min);
-  return BigNumber.from("10").pow(decimals).mul(v);
-}
 
 export function makeDeployGate(
   hre: HardhatRuntimeEnvironment
@@ -131,10 +123,14 @@ export function makeDeployGate(
 // autoClaim
 //
 
+interface EmulatorClaimContext {
+  gate?: DeBridgeGate;
+  txHash?: string;
+}
+
 export type AutoClaimFunction = (
-  opts?: GetClaimArgsOpts,
-  overrides?: Overrides & { from?: string | Promise<string> }
-) => Promise<ContractTransaction>;
+  ctx?: EmulatorClaimContext,
+) => Promise<string[]>;
 
 export function makeAutoClaimFunction(
   hre: HardhatRuntimeEnvironment
@@ -142,90 +138,61 @@ export function makeAutoClaimFunction(
   _check(hre);
 
   return async function autoClaim(
-    opts: GetClaimArgsOpts = {},
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction> {
-    opts.gate = opts.gate || STATE.currentGate;
-    if (!opts.gate) {
-      throw new Error("DeBridgeGate not yet deployed");
-    }
-
-    const args = await hre.deBridge.emulator.getClaimArgs(opts, overrides);
-    return opts.gate.claim(
-      ...args
-    );
-  };
-}
-
-//
-// getClaimArgs
-//
-
-type ClaimArgs = Parameters<DeBridgeGate["claim"]>
-
-interface GetClaimArgsOpts {
-  gate?: DeBridgeGate;
-  txHash?: string;
-}
-
-export type GetClaimArgsFunction = (
-  opts?: GetClaimArgsOpts,
-  overrides?: Overrides & { from?: string | Promise<string> }
-) => Promise<ClaimArgs>;
-
-async function getSubmission(txHash: string, ctx: Context): Promise<Submission | undefined> {
-  const submissions = await Submission.findAll(txHash, ctx)
-  if (submissions.length > 0) return submissions[0];
-}
-
-async function findLastSubmission(gate: DeBridgeGate, ctx: Context): Promise<Submission | undefined> {
-    // find the last Sent() event emitted
-    const sentEvent =
-      (await gate.queryFilter(gate.filters.Sent()))
-        .reverse()[0];
-
-    if (!sentEvent)
-      throw new Error("Sent() event not found");
-
-    return Submission.find(
-      sentEvent.transactionHash,
-      sentEvent.args.submissionId,
-      ctx
-    );
-}
-
-export function makeGetClaimArgs(
-  hre: HardhatRuntimeEnvironment
-): GetClaimArgsFunction {
-  _check(hre);
-
-  return async function getClaimArgs(
-    opts: GetClaimArgsOpts = {},
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ClaimArgs> {
-    const gate = opts.gate || STATE.currentGate;
+    claimContext: EmulatorClaimContext = {},
+  ): Promise<string[]> {
+    const gate = claimContext.gate || STATE.currentGate;
     if (!gate) {
       throw new Error("DeBridgeGate not yet deployed");
     }
 
-    const ctx = {
+    const evmContext = {
       deBridgeGateAddress: gate.address,
       provider: gate.provider,
       signatureStorage: new DummySignatureStorage()
     };
-    const submission = opts.txHash
-      ? await getSubmission(opts.txHash, ctx)
-      : await findLastSubmission(gate, ctx)
 
-    if (!submission)
-      throw new Error("Unexpected: submission not found")
+    // pull all submissions (either from specific tx or from all recent blocks)
+    const submissions = claimContext.txHash
+      ? await getSubmissions(claimContext.txHash, evmContext)
+      : await pullSubmissions(gate, evmContext);
 
-    const claim = await submission.toEVMClaim(ctx);
-    const args = await claim.getClaimArgs();
+      // find those that were not tracked yet
+    const claims = await Promise.all(
+      submissions.map(async (submission) => submission.toEVMClaim(evmContext))
+    );
+    const submissionStates = await Promise.all(
+      claims.map(async (claim) => claim.isClaimed())
+    );
 
-    return [
-      ...args,
-      overrides || {},
-    ];
+    // find out which submissions must be claimed
+    const claimsToExecute = claims.filter((_, k) => submissionStates[k] === false)
+
+    // claim them all
+    return Promise.all(
+      claimsToExecute.map(async (claim) => {
+        const args = await claim.getClaimArgs()
+        await gate.claim(...args);
+        return claim.submissionId.toString()
+      })
+    )
   };
+}
+
+async function getSubmissions(txHash: string, ctx: Context): Promise<Submission[]> {
+  return await Submission.findAll(txHash, ctx)
+}
+
+async function pullSubmissions(gate: DeBridgeGate, ctx: Context): Promise<Submission[]> {
+  const events = await gate.queryFilter(gate.filters.Sent(), STATE.latestScannedBlock);
+  if (events.length) {
+    STATE.latestScannedBlock = events[events.length - 1].blockNumber - 1;
+  }
+  return Promise.all(
+    events
+      .map(async (s: SentEvent): Promise<Submission> => Submission.find(
+        s.transactionHash,
+        s.args.submissionId,
+        ctx
+      ) as Promise<Submission>)
+  );
 }

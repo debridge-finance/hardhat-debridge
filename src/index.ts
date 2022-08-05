@@ -12,7 +12,6 @@ import { DeBridgeEmulator } from "./emulator";
 import {
   AutoClaimFunction,
   DeployDebridgeGateFunction,
-  GetClaimArgsFunction,
 } from "./functions";
 import "./type-extensions";
 
@@ -27,7 +26,6 @@ export interface DeBridge {
   emulator: {
     deployGate: DeployDebridgeGateFunction;
     autoClaim: AutoClaimFunction;
-    getClaimArgs: GetClaimArgsFunction;
   };
 }
 
@@ -36,7 +34,6 @@ extendEnvironment((hre) => {
     (): DeBridge => {
       const {
         makeDeployGate,
-        makeGetClaimArgs,
         makeAutoClaimFunction,
       } = require("./functions");
 
@@ -44,7 +41,6 @@ extendEnvironment((hre) => {
         emulator: {
           deployGate: makeDeployGate(hre),
           autoClaim: makeAutoClaimFunction(hre),
-          getClaimArgs: makeGetClaimArgs(hre),
         },
       };
     }

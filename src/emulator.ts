@@ -114,7 +114,8 @@ export class DeBridgeEmulator {
     const submission = await Submission.find(sentEvent.transactionHash, sentEvent.args.submissionId, this.evmCtx)
     if (!submission) throw new Error("Unexpected: submission not found")
 
-    if (submission.autoParams.executionFee.lt(this.opts.minExFee)) {
+    const exFee = BigNumber.from(submission.autoParams.executionFee);
+    if (exFee.lt(this.opts.minExFee)) {
       console.log(
         `[SubmissionId: ${chalk.red(
           submission.submissionId
