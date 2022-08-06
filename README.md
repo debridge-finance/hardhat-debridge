@@ -114,6 +114,59 @@ DeBridge emulator is waiting for events...
 
 Start calling your sender contract: you'll see transactions being printed in the first terminal while messages coming to the `deBridgeGate` contract being captured and bridged back in the second terminal.
 
+## deSDK-friendly! 🐶
+
+The emulator itself is based on vanilla contracts that implement the core deBridge protocol, introducing some handy automation for it under the hood. This means that you can use the emulator along with the deBridge SDK and send and track submissions and claims explicitly when necessary.
+
+The only thing to remember is to pass the corresponding context where the emulator is being deployed.
+
+[Consider looking](test/project.test.ts#L165-L186) into how this feature is used by the test cases for the `debridge-hardhat` itself, or inspect the following example:
+
+```ts
+// deploy the gate
+const gate = await deBridge.emulator.deployGate();
+
+// configure sender and callee contracts
+// [...]
+
+// call the contract that interacts with the gate. Mind that we keep
+// the transaction hash where the call occurs to find a cross-chain submission
+const tx = await senderContractChainA.sendValue(/*[...]*/);
+const rcp = await tx.wait();
+
+// NOW,
+// instead of calling deBridge.emulator.autoClaim(),
+// we are going to manage the submission explicitly
+
+// craft the context deSDK shall work within
+const evmContext = {
+    // pass the current hardhat network. deSDK is ready to accept it
+    provider: hre,
+
+    // pass the custom address of the gate we are interacting with
+    deBridgeGateAddress: gate.address,
+
+    // emulated gate works without signatures, so pass a dummy
+    signatureStorage: new evm.DummySignatureStorage()
+}
+
+// find all submissions that may have occurred within a transaction
+const submissions = await evm.Submission.findAll(
+    rcp.transactionHash, // <!-- provide the tx hash where the call occurred
+    evmContext
+);
+
+// we know our contract made only one submission to the gate ,
+// but in real life there can be multiple submissions (e.g. send to different
+// chains) within one single transactions
+const [submission] = submissions;
+
+// claim this submission explicitly
+const claim = await submission.toEVMClaim(evmContext);
+const args = await claim.getClaimArgs();
+await gate.claim(...args);
+```
+
 ## Questions?
 
 Welcome to the [`#developers-chat`](https://discord.com/channels/875308315700264970/876748142777864202) at the deBridge Discord server.
