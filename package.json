@@ -65,6 +65,6 @@
     }
   },
   "dependencies": {
-    "@debridge-finance/desdk": "github:debridge-finance/desdk#3867321"
+    "@debridge-finance/desdk": "github:debridge-finance/desdk#4feddef"
   }
 }

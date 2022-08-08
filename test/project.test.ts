@@ -172,7 +172,7 @@ describe("Check emulator functions", function () {
 
         // claim second submission explicitly
         const claim = await submissions[1].toEVMClaim(this.evmContext);
-        const args = await claim.getClaimArgs();
+        const args = await claim.getEncodedArgs();
         await this.contracts.gate.claim(...args);
       });
 
@@ -255,7 +255,7 @@ describe("Check emulator functions", function () {
         expect(1).to.be.eq(submissions.length);
 
         const claim = await submissions[0].toEVMClaim(this.evmContext);
-        const args = await claim.getClaimArgs();
+        const args = await claim.getEncodedArgs();
         await this.contracts.gate.claim(...args);
       });
 

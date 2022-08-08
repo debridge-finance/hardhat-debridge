@@ -174,7 +174,7 @@ export function makeAutoClaimFunction(
     // claim them all
     return Promise.all(
       claimsToExecute.map(async (claim) => {
-        const args = await claim.getClaimArgs();
+        const args = await claim.getEncodedArgs();
         await gate.claim(...args);
         return claim.submissionId.toString();
       })

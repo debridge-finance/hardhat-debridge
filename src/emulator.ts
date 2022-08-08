@@ -149,7 +149,7 @@ export class DeBridgeEmulator {
 
     try {
       const claim = await submission.toEVMClaim(this.evmCtx);
-      const args = await claim.getClaimArgs();
+      const args = await claim.getEncodedArgs();
       const claimTx = await this.gate.claim(...args, {
         gasLimit: 8_000_000,
       });
