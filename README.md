@@ -19,10 +19,8 @@ In a nutshell, this plugin is suitable to validate cross-chain interactions as f
 Install the package:
 
 ```bash
-npm i --save-dev git@github.com:debridge-finance/hardhat-debridge.git
+npm i --save-dev @debridge-finance/hardhat-debridge
 ```
-
-*This plugin is currently a technology preview. We are going to release the final version along with an npm package later this year.*
 
 Import the plugin in your `hardhat.config.ts`:
 

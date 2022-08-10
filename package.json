@@ -1,9 +1,9 @@
 {
   "name": "@debridge-finance/hardhat-debridge",
   "version": "0.0.1",
-  "description": "A plugin for Hardhat that provides the toolkit to test and emulate dApps built on top of deBridge protocol.",
+  "description": "A plugin for Hardhat that provides the toolkit to test and emulate dApps built on top of the deBridge protocol.",
   "repository": "github:debridge-finance/hardhat-debridge",
-  "author": "Debridge.Finance",
+  "author": "deBridge",
   "license": "MIT",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -16,8 +16,7 @@
     "lint:fix": "prettier --write 'src/**/*.{js,ts}' 'test/**/*.{js,ts}' && tslint --fix --config tslint.json --project tsconfig.json",
     "lint": "tslint --config tslint.json --project tsconfig.json",
     "test": "mocha --exit --recursive 'test/**/*.test.ts'",
-    "build": "rm -rf ./dist && npx hardhat compile --force && tsc",
-    "prepublishOnly": "npm run build",
+    "build": "tsc",
     "prepare": "npm run build"
   },
   "files": [
@@ -65,6 +64,6 @@
     }
   },
   "dependencies": {
-    "@debridge-finance/desdk": "github:debridge-finance/desdk#4feddef"
+    "@debridge-finance/desdk": "^0.0.1"
   }
 }
