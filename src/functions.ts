@@ -8,9 +8,13 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import {
   CallProxy,
+  CallProxy__factory,
   DeBridgeGate,
+  DeBridgeGate__factory,
   MockWeth,
   MockWeth__factory,
+  SignatureUtil__factory,
+  SignatureVerifier__factory,
 } from "../typechain";
 import { SentEvent } from "../typechain/@debridge-finance/contracts/contracts/interfaces/IDeBridgeGate";
 
@@ -49,16 +53,14 @@ export function makeDeployGate(
   _check(hre);
 
   return async function deployGate(): Promise<DeBridgeGate> {
+    const [signer] = await hre.ethers.getSigners()
+
     // setup WETH9 for wrapping
-    const Weth = (await hre.ethers.getContractFactory(
-      "MockWeth"
-    )) as MockWeth__factory;
+    const Weth = new MockWeth__factory(signer)
     const weth = (await Weth.deploy("wrapped Ether", "wETH")) as MockWeth;
     await weth.deployed();
 
-    const DeBridgeGateFactory = await hre.ethers.getContractFactory(
-      "DeBridgeGate"
-    );
+    const DeBridgeGateFactory = new DeBridgeGate__factory(signer);
     const deBridgeGate = (await hre.upgrades.deployProxy(DeBridgeGateFactory, [
       0,
       weth.address,
@@ -66,7 +68,7 @@ export function makeDeployGate(
     await deBridgeGate.deployed();
 
     // setup callproxy
-    const CallProxyFactory = await hre.ethers.getContractFactory("CallProxy");
+    const CallProxyFactory = new CallProxy__factory(signer);
     const callProxy = (await hre.upgrades.deployProxy(
       CallProxyFactory
     )) as CallProxy;
@@ -79,9 +81,9 @@ export function makeDeployGate(
     await deBridgeGate.setCallProxy(callProxy.address);
 
     // setup signature verifier
-    const Verifier = await hre.ethers.getContractFactory("SignatureVerifier");
+    const Verifier = new SignatureVerifier__factory(signer);
     const signatureVerifierMock = await deployMockContract(
-      (await hre.ethers.getSigners())[0],
+      signer,
       [...Verifier.interface.fragments]
     );
     await signatureVerifierMock.mock.submit.returns();
