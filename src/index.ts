@@ -1,5 +1,4 @@
 import "@nomiclabs/hardhat-ethers";
-import "@openzeppelin/hardhat-upgrades";
 import { BigNumber } from "ethers";
 import {
   TASK_NODE,
