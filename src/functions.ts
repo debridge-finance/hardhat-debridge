@@ -50,7 +50,6 @@ const STATE: InternalEmulatorState = {
 
 export type DeployDebridgeGateFunction = () => Promise<DeBridgeGate>;
 
-
 export function makeDeployGate(
   hre: HardhatRuntimeEnvironment
 ): DeployDebridgeGateFunction {
@@ -59,30 +58,40 @@ export function makeDeployGate(
   // this is a simple implementation of hardhat-upgrades plugin
   // which puts the impl contract under the ERC1967Proxy umbrella
   // and calls the initialize() method
-  async function deployProxified(factory: ContractFactory, args?: unknown[]): Promise<Contract> {
+  async function deployProxified(
+    factory: ContractFactory,
+    args?: unknown[]
+  ): Promise<Contract> {
     // find the initialize() function fragment
-    const initializeFuncFragment = factory.interface.fragments.find(fragment => fragment.name === 'initialize' && fragment.type === 'function') as FunctionFragment
-    if (!initializeFuncFragment)
+    const initializeFuncFragment = factory.interface.fragments.find(
+      (fragment) =>
+        fragment.name === "initialize" && fragment.type === "function"
+    ) as FunctionFragment;
+    if (!initializeFuncFragment) {
       throw new Error("Contact does not have the initialize() func");
+    }
 
-      // deploy the implementation contract
+    // deploy the implementation contract
     const impl = await factory.deploy();
-    await impl.deployed()
+    await impl.deployed();
 
     // deploy proxy, passing the impl address + the call to the initialize method
-      const [signer] = await hre.ethers.getSigners()
-      const Proxy = new ERC1967Proxy__factory(signer)
-      const proxy = await Proxy.deploy(impl.address, factory.interface.encodeFunctionData(initializeFuncFragment, args));
-      await proxy.deployed()
+    const [signer] = await hre.ethers.getSigners();
+    const Proxy = new ERC1967Proxy__factory(signer);
+    const proxy = await Proxy.deploy(
+      impl.address,
+      factory.interface.encodeFunctionData(initializeFuncFragment, args)
+    );
+    await proxy.deployed();
 
-      return factory.attach(proxy.address)
+    return factory.attach(proxy.address);
   }
 
   return async function deployGate(): Promise<DeBridgeGate> {
-    const [signer] = await hre.ethers.getSigners()
+    const [signer] = await hre.ethers.getSigners();
 
     // setup WETH9 for wrapping
-    const Weth = new MockWeth__factory(signer)
+    const Weth = new MockWeth__factory(signer);
     const weth = (await Weth.deploy("wrapped Ether", "wETH")) as MockWeth;
     await weth.deployed();
 
@@ -95,9 +104,7 @@ export function makeDeployGate(
 
     // setup callproxy
     const CallProxyFactory = new CallProxy__factory(signer);
-    const callProxy = (await deployProxified(
-      CallProxyFactory
-    )) as CallProxy;
+    const callProxy = (await deployProxified(CallProxyFactory)) as CallProxy;
     await callProxy.deployed();
 
     await callProxy.grantRole(
@@ -108,10 +115,9 @@ export function makeDeployGate(
 
     // setup signature verifier
     const Verifier = new SignatureVerifier__factory(signer);
-    const signatureVerifierMock = await deployMockContract(
-      signer,
-      [...Verifier.interface.fragments]
-    );
+    const signatureVerifierMock = await deployMockContract(signer, [
+      ...Verifier.interface.fragments,
+    ]);
     await signatureVerifierMock.mock.submit.returns();
 
     await deBridgeGate.setSignatureVerifier(signatureVerifierMock.address);

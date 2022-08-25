@@ -45,7 +45,7 @@ describe("Check emulator functions", function () {
         true,
         0,
         new SendAutoParams({
-          executionFee: '0',
+          executionFee: "0",
           fallbackAddress: receiver.address,
           flags: new Flags(Flag.UNWRAP_ETH), // expect to receive native ether
           data: "0x",
