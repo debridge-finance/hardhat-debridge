@@ -203,7 +203,7 @@ export function makeAutoClaimFunction(
     return Promise.all(
       claimsToExecute.map(async (claim) => {
         const args = await claim.getEncodedArgs();
-        await gate.claim(...args);
+        await gate.claim(...args, { gasLimit: 8_000_000 });
         return claim.submissionId.toString();
       })
     );
