@@ -1,6 +1,6 @@
 {
   "name": "@debridge-finance/hardhat-debridge",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "description": "A plugin for Hardhat that provides the toolkit to test and emulate dApps built on top of the deBridge protocol.",
   "repository": "github:debridge-finance/hardhat-debridge",
   "author": "deBridge",
