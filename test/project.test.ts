@@ -60,6 +60,47 @@ describe("Check emulator functions", function () {
       const receiverAmountAfter = await receiver.getBalance();
       expect(receiverAmountAfter.eq(expectedAmount)).to.equal(true);
     });
+
+    it("Should reveal actual EVM call stack using the buildinfo when error occurred inside the deBridgeGate contact", async function () {
+      const gate = await this.hre.deBridge.emulator.deployGate();
+      const [, receiver] = await this.hre.ethers.getSigners();
+
+      const txPromise = gate.send(
+        ethers.constants.AddressZero,
+        parseEther("1"),
+        this.hre.ethers.provider.network.chainId,
+        receiver.address,
+        "0x",
+        true,
+        0,
+        new SendAutoParams({
+          executionFee: "0",
+          fallbackAddress: receiver.address,
+          flags: new Flags(),
+          data: "0x",
+        }).encode(),
+        { value: "0", gasLimit: 8_000_000 }
+      );
+
+      await expect(txPromise).to.be.revertedWithCustomError(
+        gate,
+        "TransferAmountNotCoverFees"
+      );
+
+      try {
+        await txPromise;
+        expect(true).to.eq(false, "Should not happen");
+      } catch (e) {
+        const lastCall = e.stackTrace[e.stackTrace.length - 1].sourceReference;
+        expect(lastCall.function).to.eq("_send");
+        expect(lastCall.contract).to.eq("DeBridgeGate");
+        expect(lastCall.sourceName).to.match(
+          new RegExp(
+            "https://github.com/debridge-finance/debridge-contracts-v1/blob/[a-z0-9]+/contracts/transfers/DeBridgeGate.sol"
+          )
+        );
+      }
+    });
   });
 
   describe("Checking autoClaim", function () {

@@ -21,13 +21,8 @@ import {
 } from "../typechain";
 import { SentEvent } from "../typechain/@debridge-finance/contracts/contracts/interfaces/IDeBridgeGate";
 
+import buildinfo from "./buildinfo";
 import { getRandom } from "./utils";
-
-function _check(hre: HardhatRuntimeEnvironment) {
-  if (!["hardhat", "localhost"].includes(hre.network.name)) {
-    throw new Error("deBridge.emulator is intended for hardhat network only");
-  }
-}
 
 //
 // Define the state so we can ease deBridgeSimulator usage
@@ -37,12 +32,33 @@ interface InternalEmulatorState {
   currentGate?: DeBridgeGate;
   submissions: { [key: string]: Submission };
   latestScannedBlock: number;
+  hasBuildInfoImported: boolean;
 }
 
 const STATE: InternalEmulatorState = {
   submissions: {},
   latestScannedBlock: 0,
+  hasBuildInfoImported: false,
 };
+
+function _check(hre: HardhatRuntimeEnvironment) {
+  if (!["hardhat", "localhost"].includes(hre.network.name)) {
+    throw new Error("deBridge.emulator is intended for hardhat network only");
+  }
+}
+
+async function _initializeCore(hre: HardhatRuntimeEnvironment): Promise<void> {
+  if (!STATE.hasBuildInfoImported) {
+    const { input, output, solcVersion } = buildinfo;
+
+    await hre.network.provider.request({
+      method: "hardhat_addCompilationResult",
+      params: [solcVersion, input, output],
+    });
+
+    STATE.hasBuildInfoImported = true;
+  }
+}
 
 //
 // deployGate
@@ -88,6 +104,7 @@ export function makeDeployGate(
   }
 
   return async function deployGate(): Promise<DeBridgeGate> {
+    await _initializeCore(hre);
     const [signer] = await hre.ethers.getSigners();
 
     // setup WETH9 for wrapping
@@ -176,6 +193,7 @@ export function makeAutoClaimFunction(
   return async function autoClaim(
     claimContext: EmulatorClaimContext = {}
   ): Promise<string[]> {
+    await _initializeCore(hre);
     const gate = claimContext.gate || STATE.currentGate;
     if (!gate) {
       throw new Error("DeBridgeGate not yet deployed");
