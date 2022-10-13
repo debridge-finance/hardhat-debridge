@@ -91,7 +91,9 @@ describe("Check emulator functions", function () {
         await txPromise;
         expect(true).to.eq(false, "Should not happen");
       } catch (e) {
+        expect(e.stackTrace.length).gt(0);
         const lastCall = e.stackTrace[e.stackTrace.length - 1].sourceReference;
+        expect(lastCall).is.not.eq(undefined, "Call stack is not unrolled");
         expect(lastCall.function).to.eq("_send");
         expect(lastCall.contract).to.eq("DeBridgeGate");
         expect(lastCall.sourceName).to.match(

@@ -44,7 +44,7 @@ task("build", "This task packs the current Hardhat's build-info file")
 
     // canonize filepaths, excluding findings in the contents of the contracts (e.g., import "@debridge-finance/...")
     buildInfo = buildInfo.replace(
-      /(?<!\\)"@debridge-finance\/contracts/g,
+      /(?<!import \\)"@debridge-finance\/contracts/g,
       `"https://github.com/debridge-finance/debridge-contracts-v1/blob/${deBridgeContractsGitRev}`,
     );
 

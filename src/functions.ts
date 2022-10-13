@@ -1,10 +1,9 @@
 import {
   Context,
-  DummySignatureStorage,
+  SignersSignatureStorage,
   Submission,
 } from "@debridge-finance/desdk/lib/evm";
-import { deployMockContract } from "ethereum-waffle";
-import { Contract, ContractFactory } from "ethers";
+import { Contract, ContractFactory, ethers } from "ethers";
 import { FunctionFragment } from "ethers/lib/utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -14,10 +13,9 @@ import {
   DeBridgeGate,
   DeBridgeGate__factory,
   ERC1967Proxy__factory,
+  MockSignatureVerifier__factory,
   MockWeth,
   MockWeth__factory,
-  SignatureUtil__factory,
-  SignatureVerifier__factory,
 } from "../typechain";
 import { SentEvent } from "../typechain/@debridge-finance/contracts/contracts/interfaces/IDeBridgeGate";
 
@@ -32,13 +30,15 @@ interface InternalEmulatorState {
   currentGate?: DeBridgeGate;
   submissions: { [key: string]: Submission };
   latestScannedBlock: number;
-  hasBuildInfoImported: boolean;
+  coreInitialized: boolean;
+  validators: ethers.Signer[];
 }
 
 const STATE: InternalEmulatorState = {
   submissions: {},
   latestScannedBlock: 0,
-  hasBuildInfoImported: false,
+  coreInitialized: false,
+  validators: [],
 };
 
 function _check(hre: HardhatRuntimeEnvironment) {
@@ -48,15 +48,24 @@ function _check(hre: HardhatRuntimeEnvironment) {
 }
 
 async function _initializeCore(hre: HardhatRuntimeEnvironment): Promise<void> {
-  if (!STATE.hasBuildInfoImported) {
+  if (
+    !STATE.coreInitialized ||
+    // check if hardhat-network has been reset
+    (STATE.currentGate &&
+      "0x" === (await hre.ethers.provider.getCode(STATE.currentGate?.address)))
+  ) {
+    // import buildinfo
     const { input, output, solcVersion } = buildinfo;
-
     await hre.network.provider.request({
       method: "hardhat_addCompilationResult",
       params: [solcVersion, input, output],
     });
 
-    STATE.hasBuildInfoImported = true;
+    // set validators
+    STATE.validators = (await hre.ethers.getSigners()).slice(0, 12);
+
+    // done
+    STATE.coreInitialized = true;
   }
 }
 
@@ -131,12 +140,8 @@ export function makeDeployGate(
     await deBridgeGate.setCallProxy(callProxy.address);
 
     // setup signature verifier
-    const Verifier = new SignatureVerifier__factory(signer);
-    const signatureVerifierMock = await deployMockContract(signer, [
-      ...Verifier.interface.fragments,
-    ]);
-    await signatureVerifierMock.mock.submit.returns();
-
+    const Verifier = new MockSignatureVerifier__factory(signer);
+    const signatureVerifierMock = await Verifier.deploy();
     await deBridgeGate.setSignatureVerifier(signatureVerifierMock.address);
 
     // setup chain support (loopback)
@@ -202,7 +207,7 @@ export function makeAutoClaimFunction(
     const evmContext = {
       deBridgeGateAddress: gate.address,
       provider: gate.provider,
-      signatureStorage: new DummySignatureStorage(),
+      signatureStorage: new SignersSignatureStorage(STATE.validators),
     };
 
     // pull all submissions (either from specific tx or from all recent blocks)
