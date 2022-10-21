@@ -1,2 +1,3 @@
 typechain
 test/**/typechain
+src/buildinfo.ts
