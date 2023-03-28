@@ -131,12 +131,12 @@ export class DeBridgeEmulator {
       throw new Error("Unexpected: submission not found");
     }
 
-    const exFee = BigNumber.from(submission.autoParams.executionFee);
+    const exFee = BigNumber.from(submission.autoParams?.executionFee || 0);
     if (exFee.lt(this.opts.minExFee)) {
       console.log(
         `[SubmissionId: ${chalk.red(
           submission.submissionId
-        )}] Included execution fee (${submission.autoParams.executionFee.toString()}) is less than the given minimum (${this.opts.minExFee.toString()}), skipping automatic claim`
+        )}] Included execution fee (${exFee.toString()}) is less than the given minimum (${this.opts.minExFee.toString()}), skipping automatic claim`
       );
       return;
     }

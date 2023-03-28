@@ -98,14 +98,13 @@ export interface DeBridgeGateInterface extends utils.Interface {
     "callProxy()": FunctionFragment;
     "claim(bytes32,uint256,uint256,address,uint256,bytes,bytes)": FunctionFragment;
     "deBridgeTokenDeployer()": FunctionFragment;
-    "defiController()": FunctionFragment;
     "deployNewAsset(bytes,uint256,string,string,uint8,bytes)": FunctionFragment;
     "excessConfirmations()": FunctionFragment;
     "feeContractUpdater()": FunctionFragment;
     "feeDiscount(address)": FunctionFragment;
     "feeProxy()": FunctionFragment;
-    "flash(address,address,uint256,bytes)": FunctionFragment;
-    "flashFeeBps()": FunctionFragment;
+    "gap0()": FunctionFragment;
+    "gap1()": FunctionFragment;
     "getAmountThreshold(bytes32)": FunctionFragment;
     "getChainFromConfig(uint256)": FunctionFragment;
     "getChainId()": FunctionFragment;
@@ -114,7 +113,6 @@ export interface DeBridgeGateInterface extends utils.Interface {
     "getDebridgeChainAssetFixedFee(bytes32,uint256)": FunctionFragment;
     "getDebridgeFeeInfo(bytes32)": FunctionFragment;
     "getDebridgeId(uint256,address)": FunctionFragment;
-    "getDefiAvaliableReserves(address)": FunctionFragment;
     "getDeployId(bytes32,string,string,uint8)": FunctionFragment;
     "getNativeInfo(address)": FunctionFragment;
     "getRoleAdmin(bytes32)": FunctionFragment;
@@ -132,14 +130,13 @@ export interface DeBridgeGateInterface extends utils.Interface {
     "pause()": FunctionFragment;
     "paused()": FunctionFragment;
     "renounceRole(bytes32,address)": FunctionFragment;
-    "requestReserves(address,uint256)": FunctionFragment;
-    "returnReserves(address,uint256)": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
     "send(address,uint256,uint256,bytes,bytes,bool,uint32,bytes)": FunctionFragment;
+    "sendMessage(uint256,bytes,bytes,uint256,uint32)": FunctionFragment;
+    "sendMessage(uint256,bytes,bytes)": FunctionFragment;
     "setCallProxy(address)": FunctionFragment;
     "setChainSupport(uint256,bool,bool)": FunctionFragment;
     "setDeBridgeTokenDeployer(address)": FunctionFragment;
-    "setDefiController(address)": FunctionFragment;
     "setFeeContractUpdater(address)": FunctionFragment;
     "setFeeProxy(address)": FunctionFragment;
     "setSignatureVerifier(address)": FunctionFragment;
@@ -152,7 +149,6 @@ export interface DeBridgeGateInterface extends utils.Interface {
     "updateChainSupport(uint256[],(uint256,bool,uint16)[],bool)": FunctionFragment;
     "updateExcessConfirmations(uint8)": FunctionFragment;
     "updateFeeDiscount(address,uint16,uint16)": FunctionFragment;
-    "updateFlashFee(uint256)": FunctionFragment;
     "updateGlobalFee(uint256,uint16)": FunctionFragment;
     "version()": FunctionFragment;
     "weth()": FunctionFragment;
@@ -172,14 +168,13 @@ export interface DeBridgeGateInterface extends utils.Interface {
       | "callProxy"
       | "claim"
       | "deBridgeTokenDeployer"
-      | "defiController"
       | "deployNewAsset"
       | "excessConfirmations"
       | "feeContractUpdater"
       | "feeDiscount"
       | "feeProxy"
-      | "flash"
-      | "flashFeeBps"
+      | "gap0"
+      | "gap1"
       | "getAmountThreshold"
       | "getChainFromConfig"
       | "getChainId"
@@ -188,7 +183,6 @@ export interface DeBridgeGateInterface extends utils.Interface {
       | "getDebridgeChainAssetFixedFee"
       | "getDebridgeFeeInfo"
       | "getDebridgeId"
-      | "getDefiAvaliableReserves"
       | "getDeployId"
       | "getNativeInfo"
       | "getRoleAdmin"
@@ -206,14 +200,13 @@ export interface DeBridgeGateInterface extends utils.Interface {
       | "pause"
       | "paused"
       | "renounceRole"
-      | "requestReserves"
-      | "returnReserves"
       | "revokeRole"
       | "send"
+      | "sendMessage(uint256,bytes,bytes,uint256,uint32)"
+      | "sendMessage(uint256,bytes,bytes)"
       | "setCallProxy"
       | "setChainSupport"
       | "setDeBridgeTokenDeployer"
-      | "setDefiController"
       | "setFeeContractUpdater"
       | "setFeeProxy"
       | "setSignatureVerifier"
@@ -226,7 +219,6 @@ export interface DeBridgeGateInterface extends utils.Interface {
       | "updateChainSupport"
       | "updateExcessConfirmations"
       | "updateFeeDiscount"
-      | "updateFlashFee"
       | "updateGlobalFee"
       | "version"
       | "weth"
@@ -280,10 +272,6 @@ export interface DeBridgeGateInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "defiController",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "deployNewAsset",
     values: [
       PromiseOrValue<BytesLike>,
@@ -307,19 +295,8 @@ export interface DeBridgeGateInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(functionFragment: "feeProxy", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "flash",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>
-    ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "flashFeeBps",
-    values?: undefined
-  ): string;
+  encodeFunctionData(functionFragment: "gap0", values?: undefined): string;
+  encodeFunctionData(functionFragment: "gap1", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "getAmountThreshold",
     values: [PromiseOrValue<BytesLike>]
@@ -351,10 +328,6 @@ export interface DeBridgeGateInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "getDebridgeId",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getDefiAvaliableReserves",
-    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "getDeployId",
@@ -430,14 +403,6 @@ export interface DeBridgeGateInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "requestReserves",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "returnReserves",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "revokeRole",
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
@@ -455,6 +420,24 @@ export interface DeBridgeGateInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "sendMessage(uint256,bytes,bytes,uint256,uint32)",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "sendMessage(uint256,bytes,bytes)",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<BytesLike>
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setCallProxy",
     values: [PromiseOrValue<string>]
   ): string;
@@ -468,10 +451,6 @@ export interface DeBridgeGateInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "setDeBridgeTokenDeployer",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setDefiController",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
@@ -537,10 +516,6 @@ export interface DeBridgeGateInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "updateFlashFee",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "updateGlobalFee",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
@@ -587,10 +562,6 @@ export interface DeBridgeGateInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "defiController",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "deployNewAsset",
     data: BytesLike
   ): Result;
@@ -607,11 +578,8 @@ export interface DeBridgeGateInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "feeProxy", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "flash", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "flashFeeBps",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "gap0", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "gap1", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getAmountThreshold",
     data: BytesLike
@@ -639,10 +607,6 @@ export interface DeBridgeGateInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getDebridgeId",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getDefiAvaliableReserves",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -695,16 +659,16 @@ export interface DeBridgeGateInterface extends utils.Interface {
     functionFragment: "renounceRole",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "requestReserves",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "returnReserves",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "send", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "sendMessage(uint256,bytes,bytes,uint256,uint32)",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "sendMessage(uint256,bytes,bytes)",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "setCallProxy",
     data: BytesLike
@@ -715,10 +679,6 @@ export interface DeBridgeGateInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "setDeBridgeTokenDeployer",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setDefiController",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -767,10 +727,6 @@ export interface DeBridgeGateInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "updateFlashFee",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "updateGlobalFee",
     data: BytesLike
   ): Result;
@@ -791,7 +747,6 @@ export interface DeBridgeGateInterface extends utils.Interface {
     "Claimed(bytes32,bytes32,uint256,address,uint256,uint256,bytes,bool)": EventFragment;
     "FixedNativeFeeAutoUpdated(uint256)": EventFragment;
     "FixedNativeFeeUpdated(uint256,uint256)": EventFragment;
-    "Flash(address,address,address,uint256,uint256)": EventFragment;
     "Initialized(uint8)": EventFragment;
     "MonitoringClaimEvent(bytes32,uint256,uint256)": EventFragment;
     "MonitoringSendEvent(bytes32,uint256,uint256,uint256)": EventFragment;
@@ -814,7 +769,6 @@ export interface DeBridgeGateInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Claimed"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "FixedNativeFeeAutoUpdated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "FixedNativeFeeUpdated"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Flash"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MonitoringClaimEvent"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MonitoringSendEvent"): EventFragment;
@@ -925,20 +879,6 @@ export type FixedNativeFeeUpdatedEvent = TypedEvent<
 
 export type FixedNativeFeeUpdatedEventFilter =
   TypedEventFilter<FixedNativeFeeUpdatedEvent>;
-
-export interface FlashEventObject {
-  sender: string;
-  tokenAddress: string;
-  receiver: string;
-  amount: BigNumber;
-  paid: BigNumber;
-}
-export type FlashEvent = TypedEvent<
-  [string, string, string, BigNumber, BigNumber],
-  FlashEventObject
->;
-
-export type FlashEventFilter = TypedEventFilter<FlashEvent>;
 
 export interface InitializedEventObject {
   version: number;
@@ -1151,8 +1091,6 @@ export interface DeBridgeGate extends BaseContract {
 
     deBridgeTokenDeployer(overrides?: CallOverrides): Promise<[string]>;
 
-    defiController(overrides?: CallOverrides): Promise<[string]>;
-
     deployNewAsset(
       _nativeTokenAddress: PromiseOrValue<BytesLike>,
       _nativeChainId: PromiseOrValue<BigNumberish>,
@@ -1176,15 +1114,9 @@ export interface DeBridgeGate extends BaseContract {
 
     feeProxy(overrides?: CallOverrides): Promise<[string]>;
 
-    flash(
-      _tokenAddress: PromiseOrValue<string>,
-      _receiver: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      _data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+    gap0(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    flashFeeBps(overrides?: CallOverrides): Promise<[BigNumber]>;
+    gap1(overrides?: CallOverrides): Promise<[string]>;
 
     getAmountThreshold(
       arg0: PromiseOrValue<BytesLike>,
@@ -1253,11 +1185,6 @@ export interface DeBridgeGate extends BaseContract {
       _tokenAddress: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[string]>;
-
-    getDefiAvaliableReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
 
     getDeployId(
       _debridgeId: PromiseOrValue<BytesLike>,
@@ -1345,18 +1272,6 @@ export interface DeBridgeGate extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    requestReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    returnReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     revokeRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -1368,10 +1283,26 @@ export interface DeBridgeGate extends BaseContract {
       _amount: PromiseOrValue<BigNumberish>,
       _chainIdTo: PromiseOrValue<BigNumberish>,
       _receiver: PromiseOrValue<BytesLike>,
-      _permit: PromiseOrValue<BytesLike>,
+      _permitEnvelope: PromiseOrValue<BytesLike>,
       _useAssetFee: PromiseOrValue<boolean>,
       _referralCode: PromiseOrValue<BigNumberish>,
       _autoParams: PromiseOrValue<BytesLike>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    "sendMessage(uint256,bytes,bytes,uint256,uint32)"(
+      _chainIdTo: PromiseOrValue<BigNumberish>,
+      _targetContractAddress: PromiseOrValue<BytesLike>,
+      _targetContractCalldata: PromiseOrValue<BytesLike>,
+      _flags: PromiseOrValue<BigNumberish>,
+      _referralCode: PromiseOrValue<BigNumberish>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    "sendMessage(uint256,bytes,bytes)"(
+      _chainIdTo: PromiseOrValue<BigNumberish>,
+      _targetContractAddress: PromiseOrValue<BytesLike>,
+      _targetContractCalldata: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -1389,11 +1320,6 @@ export interface DeBridgeGate extends BaseContract {
 
     setDeBridgeTokenDeployer(
       _deBridgeTokenDeployer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setDefiController(
-      _defiController: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -1462,11 +1388,6 @@ export interface DeBridgeGate extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    updateFlashFee(
-      _flashFeeBps: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     updateGlobalFee(
       _globalFixedNativeFee: PromiseOrValue<BigNumberish>,
       _globalTransferFeeBps: PromiseOrValue<BigNumberish>,
@@ -1521,8 +1442,6 @@ export interface DeBridgeGate extends BaseContract {
 
   deBridgeTokenDeployer(overrides?: CallOverrides): Promise<string>;
 
-  defiController(overrides?: CallOverrides): Promise<string>;
-
   deployNewAsset(
     _nativeTokenAddress: PromiseOrValue<BytesLike>,
     _nativeChainId: PromiseOrValue<BigNumberish>,
@@ -1546,15 +1465,9 @@ export interface DeBridgeGate extends BaseContract {
 
   feeProxy(overrides?: CallOverrides): Promise<string>;
 
-  flash(
-    _tokenAddress: PromiseOrValue<string>,
-    _receiver: PromiseOrValue<string>,
-    _amount: PromiseOrValue<BigNumberish>,
-    _data: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  gap0(overrides?: CallOverrides): Promise<BigNumber>;
 
-  flashFeeBps(overrides?: CallOverrides): Promise<BigNumber>;
+  gap1(overrides?: CallOverrides): Promise<string>;
 
   getAmountThreshold(
     arg0: PromiseOrValue<BytesLike>,
@@ -1621,11 +1534,6 @@ export interface DeBridgeGate extends BaseContract {
     _tokenAddress: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<string>;
-
-  getDefiAvaliableReserves(
-    _tokenAddress: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
 
   getDeployId(
     _debridgeId: PromiseOrValue<BytesLike>,
@@ -1713,18 +1621,6 @@ export interface DeBridgeGate extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  requestReserves(
-    _tokenAddress: PromiseOrValue<string>,
-    _amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  returnReserves(
-    _tokenAddress: PromiseOrValue<string>,
-    _amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   revokeRole(
     role: PromiseOrValue<BytesLike>,
     account: PromiseOrValue<string>,
@@ -1736,10 +1632,26 @@ export interface DeBridgeGate extends BaseContract {
     _amount: PromiseOrValue<BigNumberish>,
     _chainIdTo: PromiseOrValue<BigNumberish>,
     _receiver: PromiseOrValue<BytesLike>,
-    _permit: PromiseOrValue<BytesLike>,
+    _permitEnvelope: PromiseOrValue<BytesLike>,
     _useAssetFee: PromiseOrValue<boolean>,
     _referralCode: PromiseOrValue<BigNumberish>,
     _autoParams: PromiseOrValue<BytesLike>,
+    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  "sendMessage(uint256,bytes,bytes,uint256,uint32)"(
+    _chainIdTo: PromiseOrValue<BigNumberish>,
+    _targetContractAddress: PromiseOrValue<BytesLike>,
+    _targetContractCalldata: PromiseOrValue<BytesLike>,
+    _flags: PromiseOrValue<BigNumberish>,
+    _referralCode: PromiseOrValue<BigNumberish>,
+    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  "sendMessage(uint256,bytes,bytes)"(
+    _chainIdTo: PromiseOrValue<BigNumberish>,
+    _targetContractAddress: PromiseOrValue<BytesLike>,
+    _targetContractCalldata: PromiseOrValue<BytesLike>,
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -1757,11 +1669,6 @@ export interface DeBridgeGate extends BaseContract {
 
   setDeBridgeTokenDeployer(
     _deBridgeTokenDeployer: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setDefiController(
-    _defiController: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -1830,11 +1737,6 @@ export interface DeBridgeGate extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  updateFlashFee(
-    _flashFeeBps: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   updateGlobalFee(
     _globalFixedNativeFee: PromiseOrValue<BigNumberish>,
     _globalTransferFeeBps: PromiseOrValue<BigNumberish>,
@@ -1889,8 +1791,6 @@ export interface DeBridgeGate extends BaseContract {
 
     deBridgeTokenDeployer(overrides?: CallOverrides): Promise<string>;
 
-    defiController(overrides?: CallOverrides): Promise<string>;
-
     deployNewAsset(
       _nativeTokenAddress: PromiseOrValue<BytesLike>,
       _nativeChainId: PromiseOrValue<BigNumberish>,
@@ -1914,15 +1814,9 @@ export interface DeBridgeGate extends BaseContract {
 
     feeProxy(overrides?: CallOverrides): Promise<string>;
 
-    flash(
-      _tokenAddress: PromiseOrValue<string>,
-      _receiver: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      _data: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    gap0(overrides?: CallOverrides): Promise<BigNumber>;
 
-    flashFeeBps(overrides?: CallOverrides): Promise<BigNumber>;
+    gap1(overrides?: CallOverrides): Promise<string>;
 
     getAmountThreshold(
       arg0: PromiseOrValue<BytesLike>,
@@ -1989,11 +1883,6 @@ export interface DeBridgeGate extends BaseContract {
       _tokenAddress: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<string>;
-
-    getDefiAvaliableReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     getDeployId(
       _debridgeId: PromiseOrValue<BytesLike>,
@@ -2079,18 +1968,6 @@ export interface DeBridgeGate extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    requestReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    returnReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     revokeRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -2102,12 +1979,28 @@ export interface DeBridgeGate extends BaseContract {
       _amount: PromiseOrValue<BigNumberish>,
       _chainIdTo: PromiseOrValue<BigNumberish>,
       _receiver: PromiseOrValue<BytesLike>,
-      _permit: PromiseOrValue<BytesLike>,
+      _permitEnvelope: PromiseOrValue<BytesLike>,
       _useAssetFee: PromiseOrValue<boolean>,
       _referralCode: PromiseOrValue<BigNumberish>,
       _autoParams: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<string>;
+
+    "sendMessage(uint256,bytes,bytes,uint256,uint32)"(
+      _chainIdTo: PromiseOrValue<BigNumberish>,
+      _targetContractAddress: PromiseOrValue<BytesLike>,
+      _targetContractCalldata: PromiseOrValue<BytesLike>,
+      _flags: PromiseOrValue<BigNumberish>,
+      _referralCode: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    "sendMessage(uint256,bytes,bytes)"(
+      _chainIdTo: PromiseOrValue<BigNumberish>,
+      _targetContractAddress: PromiseOrValue<BytesLike>,
+      _targetContractCalldata: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
     setCallProxy(
       _callProxy: PromiseOrValue<string>,
@@ -2123,11 +2016,6 @@ export interface DeBridgeGate extends BaseContract {
 
     setDeBridgeTokenDeployer(
       _deBridgeTokenDeployer: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setDefiController(
-      _defiController: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -2191,11 +2079,6 @@ export interface DeBridgeGate extends BaseContract {
       _address: PromiseOrValue<string>,
       _discountFixBps: PromiseOrValue<BigNumberish>,
       _discountTransferBps: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    updateFlashFee(
-      _flashFeeBps: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -2293,21 +2176,6 @@ export interface DeBridgeGate extends BaseContract {
       globalFixedNativeFee?: null,
       globalTransferFeeBps?: null
     ): FixedNativeFeeUpdatedEventFilter;
-
-    "Flash(address,address,address,uint256,uint256)"(
-      sender?: null,
-      tokenAddress?: PromiseOrValue<string> | null,
-      receiver?: PromiseOrValue<string> | null,
-      amount?: null,
-      paid?: null
-    ): FlashEventFilter;
-    Flash(
-      sender?: null,
-      tokenAddress?: PromiseOrValue<string> | null,
-      receiver?: PromiseOrValue<string> | null,
-      amount?: null,
-      paid?: null
-    ): FlashEventFilter;
 
     "Initialized(uint8)"(version?: null): InitializedEventFilter;
     Initialized(version?: null): InitializedEventFilter;
@@ -2464,8 +2332,6 @@ export interface DeBridgeGate extends BaseContract {
 
     deBridgeTokenDeployer(overrides?: CallOverrides): Promise<BigNumber>;
 
-    defiController(overrides?: CallOverrides): Promise<BigNumber>;
-
     deployNewAsset(
       _nativeTokenAddress: PromiseOrValue<BytesLike>,
       _nativeChainId: PromiseOrValue<BigNumberish>,
@@ -2487,15 +2353,9 @@ export interface DeBridgeGate extends BaseContract {
 
     feeProxy(overrides?: CallOverrides): Promise<BigNumber>;
 
-    flash(
-      _tokenAddress: PromiseOrValue<string>,
-      _receiver: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      _data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
+    gap0(overrides?: CallOverrides): Promise<BigNumber>;
 
-    flashFeeBps(overrides?: CallOverrides): Promise<BigNumber>;
+    gap1(overrides?: CallOverrides): Promise<BigNumber>;
 
     getAmountThreshold(
       arg0: PromiseOrValue<BytesLike>,
@@ -2532,11 +2392,6 @@ export interface DeBridgeGate extends BaseContract {
 
     getDebridgeId(
       _chainId: PromiseOrValue<BigNumberish>,
-      _tokenAddress: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getDefiAvaliableReserves(
       _tokenAddress: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -2625,18 +2480,6 @@ export interface DeBridgeGate extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    requestReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    returnReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     revokeRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -2648,10 +2491,26 @@ export interface DeBridgeGate extends BaseContract {
       _amount: PromiseOrValue<BigNumberish>,
       _chainIdTo: PromiseOrValue<BigNumberish>,
       _receiver: PromiseOrValue<BytesLike>,
-      _permit: PromiseOrValue<BytesLike>,
+      _permitEnvelope: PromiseOrValue<BytesLike>,
       _useAssetFee: PromiseOrValue<boolean>,
       _referralCode: PromiseOrValue<BigNumberish>,
       _autoParams: PromiseOrValue<BytesLike>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    "sendMessage(uint256,bytes,bytes,uint256,uint32)"(
+      _chainIdTo: PromiseOrValue<BigNumberish>,
+      _targetContractAddress: PromiseOrValue<BytesLike>,
+      _targetContractCalldata: PromiseOrValue<BytesLike>,
+      _flags: PromiseOrValue<BigNumberish>,
+      _referralCode: PromiseOrValue<BigNumberish>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    "sendMessage(uint256,bytes,bytes)"(
+      _chainIdTo: PromiseOrValue<BigNumberish>,
+      _targetContractAddress: PromiseOrValue<BytesLike>,
+      _targetContractCalldata: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -2669,11 +2528,6 @@ export interface DeBridgeGate extends BaseContract {
 
     setDeBridgeTokenDeployer(
       _deBridgeTokenDeployer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setDefiController(
-      _defiController: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -2742,11 +2596,6 @@ export interface DeBridgeGate extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    updateFlashFee(
-      _flashFeeBps: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     updateGlobalFee(
       _globalFixedNativeFee: PromiseOrValue<BigNumberish>,
       _globalTransferFeeBps: PromiseOrValue<BigNumberish>,
@@ -2808,8 +2657,6 @@ export interface DeBridgeGate extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    defiController(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     deployNewAsset(
       _nativeTokenAddress: PromiseOrValue<BytesLike>,
       _nativeChainId: PromiseOrValue<BigNumberish>,
@@ -2835,15 +2682,9 @@ export interface DeBridgeGate extends BaseContract {
 
     feeProxy(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    flash(
-      _tokenAddress: PromiseOrValue<string>,
-      _receiver: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      _data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
+    gap0(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    flashFeeBps(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    gap1(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getAmountThreshold(
       arg0: PromiseOrValue<BytesLike>,
@@ -2880,11 +2721,6 @@ export interface DeBridgeGate extends BaseContract {
 
     getDebridgeId(
       _chainId: PromiseOrValue<BigNumberish>,
-      _tokenAddress: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getDefiAvaliableReserves(
       _tokenAddress: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -2977,18 +2813,6 @@ export interface DeBridgeGate extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    requestReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    returnReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     revokeRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -3000,10 +2824,26 @@ export interface DeBridgeGate extends BaseContract {
       _amount: PromiseOrValue<BigNumberish>,
       _chainIdTo: PromiseOrValue<BigNumberish>,
       _receiver: PromiseOrValue<BytesLike>,
-      _permit: PromiseOrValue<BytesLike>,
+      _permitEnvelope: PromiseOrValue<BytesLike>,
       _useAssetFee: PromiseOrValue<boolean>,
       _referralCode: PromiseOrValue<BigNumberish>,
       _autoParams: PromiseOrValue<BytesLike>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    "sendMessage(uint256,bytes,bytes,uint256,uint32)"(
+      _chainIdTo: PromiseOrValue<BigNumberish>,
+      _targetContractAddress: PromiseOrValue<BytesLike>,
+      _targetContractCalldata: PromiseOrValue<BytesLike>,
+      _flags: PromiseOrValue<BigNumberish>,
+      _referralCode: PromiseOrValue<BigNumberish>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    "sendMessage(uint256,bytes,bytes)"(
+      _chainIdTo: PromiseOrValue<BigNumberish>,
+      _targetContractAddress: PromiseOrValue<BytesLike>,
+      _targetContractCalldata: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -3021,11 +2861,6 @@ export interface DeBridgeGate extends BaseContract {
 
     setDeBridgeTokenDeployer(
       _deBridgeTokenDeployer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setDefiController(
-      _defiController: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -3091,11 +2926,6 @@ export interface DeBridgeGate extends BaseContract {
       _address: PromiseOrValue<string>,
       _discountFixBps: PromiseOrValue<BigNumberish>,
       _discountTransferBps: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    updateFlashFee(
-      _flashFeeBps: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

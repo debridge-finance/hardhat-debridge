@@ -50,7 +50,7 @@ task("build", "This task packs the current Hardhat's build-info file")
     const packages = JSON.parse(fs.readFileSync(packageJsonFile).toString());
     const deBridgePackage = packages.devDependencies['@debridge-finance/contracts']
     const deBridgeContractsGitRev = deBridgePackage
-      .match(/#([a-zA-Z0-9]+$)/)[1]
+      .match(/#(v(\d+\.?)+$)/)[1]
       .substring(0, 8);
     console.log(deBridgeContractsGitRev)
 

@@ -28,7 +28,7 @@
     "README.md"
   ],
   "devDependencies": {
-    "@debridge-finance/contracts": "github:debridge-finance/debridge-contracts-v1#8c6f3845288d8e0596fb2700beb2ee2725d802fb",
+    "@debridge-finance/contracts": "github:debridge-finance/debridge-contracts-v1#v4.2.1",
     "@nomiclabs/hardhat-ethers": "^2.0.6",
     "@typechain/ethers-v5": "^10.1.0",
     "@typechain/hardhat": "^6.1.2",
