@@ -71,7 +71,7 @@ const _abi = [
     stateMutability: "nonpayable",
     type: "function",
   },
-];
+] as const;
 
 export class ISignatureVerifier__factory {
   static readonly abi = _abi;

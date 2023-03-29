@@ -75,7 +75,7 @@ const _abi = [
     stateMutability: "nonpayable",
     type: "function",
   },
-];
+] as const;
 
 export class IDeBridgeTokenDeployer__factory {
   static readonly abi = _abi;

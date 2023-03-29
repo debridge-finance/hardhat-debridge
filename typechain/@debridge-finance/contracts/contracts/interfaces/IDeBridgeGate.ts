@@ -66,32 +66,35 @@ export declare namespace IDeBridgeGate {
 
 export interface IDeBridgeGateInterface extends utils.Interface {
   functions: {
+    "callProxy()": FunctionFragment;
     "claim(bytes32,uint256,uint256,address,uint256,bytes,bytes)": FunctionFragment;
-    "flash(address,address,uint256,bytes)": FunctionFragment;
     "getDebridgeChainAssetFixedFee(bytes32,uint256)": FunctionFragment;
-    "getDefiAvaliableReserves(address)": FunctionFragment;
     "getNativeInfo(address)": FunctionFragment;
+    "globalFixedNativeFee()": FunctionFragment;
+    "globalTransferFeeBps()": FunctionFragment;
     "isSubmissionUsed(bytes32)": FunctionFragment;
-    "requestReserves(address,uint256)": FunctionFragment;
-    "returnReserves(address,uint256)": FunctionFragment;
     "send(address,uint256,uint256,bytes,bytes,bool,uint32,bytes)": FunctionFragment;
+    "sendMessage(uint256,bytes,bytes,uint256,uint32)": FunctionFragment;
+    "sendMessage(uint256,bytes,bytes)": FunctionFragment;
     "withdrawFee(bytes32)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
+      | "callProxy"
       | "claim"
-      | "flash"
       | "getDebridgeChainAssetFixedFee"
-      | "getDefiAvaliableReserves"
       | "getNativeInfo"
+      | "globalFixedNativeFee"
+      | "globalTransferFeeBps"
       | "isSubmissionUsed"
-      | "requestReserves"
-      | "returnReserves"
       | "send"
+      | "sendMessage(uint256,bytes,bytes,uint256,uint32)"
+      | "sendMessage(uint256,bytes,bytes)"
       | "withdrawFee"
   ): FunctionFragment;
 
+  encodeFunctionData(functionFragment: "callProxy", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "claim",
     values: [
@@ -105,37 +108,24 @@ export interface IDeBridgeGateInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "flash",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>
-    ]
-  ): string;
-  encodeFunctionData(
     functionFragment: "getDebridgeChainAssetFixedFee",
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getDefiAvaliableReserves",
-    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "getNativeInfo",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
+    functionFragment: "globalFixedNativeFee",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "globalTransferFeeBps",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "isSubmissionUsed",
     values: [PromiseOrValue<BytesLike>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "requestReserves",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "returnReserves",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "send",
@@ -151,18 +141,32 @@ export interface IDeBridgeGateInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "sendMessage(uint256,bytes,bytes,uint256,uint32)",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "sendMessage(uint256,bytes,bytes)",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<BytesLike>
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "withdrawFee",
     values: [PromiseOrValue<BytesLike>]
   ): string;
 
+  decodeFunctionResult(functionFragment: "callProxy", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "flash", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getDebridgeChainAssetFixedFee",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getDefiAvaliableReserves",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -170,18 +174,26 @@ export interface IDeBridgeGateInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "globalFixedNativeFee",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "globalTransferFeeBps",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "isSubmissionUsed",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "requestReserves",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "returnReserves",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "send", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "sendMessage(uint256,bytes,bytes,uint256,uint32)",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "sendMessage(uint256,bytes,bytes)",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "withdrawFee",
     data: BytesLike
@@ -196,7 +208,6 @@ export interface IDeBridgeGateInterface extends utils.Interface {
     "Claimed(bytes32,bytes32,uint256,address,uint256,uint256,bytes,bool)": EventFragment;
     "FixedNativeFeeAutoUpdated(uint256)": EventFragment;
     "FixedNativeFeeUpdated(uint256,uint256)": EventFragment;
-    "Flash(address,address,address,uint256,uint256)": EventFragment;
     "MonitoringClaimEvent(bytes32,uint256,uint256)": EventFragment;
     "MonitoringSendEvent(bytes32,uint256,uint256,uint256)": EventFragment;
     "PairAdded(bytes32,address,bytes,uint256,uint256,uint16)": EventFragment;
@@ -213,7 +224,6 @@ export interface IDeBridgeGateInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Claimed"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "FixedNativeFeeAutoUpdated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "FixedNativeFeeUpdated"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Flash"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MonitoringClaimEvent"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MonitoringSendEvent"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "PairAdded"): EventFragment;
@@ -318,20 +328,6 @@ export type FixedNativeFeeUpdatedEvent = TypedEvent<
 
 export type FixedNativeFeeUpdatedEventFilter =
   TypedEventFilter<FixedNativeFeeUpdatedEvent>;
-
-export interface FlashEventObject {
-  sender: string;
-  tokenAddress: string;
-  receiver: string;
-  amount: BigNumber;
-  paid: BigNumber;
-}
-export type FlashEvent = TypedEvent<
-  [string, string, string, BigNumber, BigNumber],
-  FlashEventObject
->;
-
-export type FlashEventFilter = TypedEventFilter<FlashEvent>;
 
 export interface MonitoringClaimEventEventObject {
   submissionId: string;
@@ -450,6 +446,10 @@ export interface IDeBridgeGate extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    callProxy(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     claim(
       _debridgeId: PromiseOrValue<BytesLike>,
       _amount: PromiseOrValue<BigNumberish>,
@@ -461,22 +461,9 @@ export interface IDeBridgeGate extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    flash(
-      _tokenAddress: PromiseOrValue<string>,
-      _receiver: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      _data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     getDebridgeChainAssetFixedFee(
       _debridgeId: PromiseOrValue<BytesLike>,
       _chainId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    getDefiAvaliableReserves(
-      _tokenAddress: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
@@ -485,20 +472,16 @@ export interface IDeBridgeGate extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    globalFixedNativeFee(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    globalTransferFeeBps(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     isSubmissionUsed(
       submissionId: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    requestReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    returnReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -507,10 +490,26 @@ export interface IDeBridgeGate extends BaseContract {
       _amount: PromiseOrValue<BigNumberish>,
       _chainIdTo: PromiseOrValue<BigNumberish>,
       _receiver: PromiseOrValue<BytesLike>,
-      _permit: PromiseOrValue<BytesLike>,
+      _permitEnvelope: PromiseOrValue<BytesLike>,
       _useAssetFee: PromiseOrValue<boolean>,
       _referralCode: PromiseOrValue<BigNumberish>,
       _autoParams: PromiseOrValue<BytesLike>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    "sendMessage(uint256,bytes,bytes,uint256,uint32)"(
+      _dstChainId: PromiseOrValue<BigNumberish>,
+      _targetContractAddress: PromiseOrValue<BytesLike>,
+      _targetContractCalldata: PromiseOrValue<BytesLike>,
+      _flags: PromiseOrValue<BigNumberish>,
+      _referralCode: PromiseOrValue<BigNumberish>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    "sendMessage(uint256,bytes,bytes)"(
+      _dstChainId: PromiseOrValue<BigNumberish>,
+      _targetContractAddress: PromiseOrValue<BytesLike>,
+      _targetContractCalldata: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -519,6 +518,10 @@ export interface IDeBridgeGate extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
+
+  callProxy(
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   claim(
     _debridgeId: PromiseOrValue<BytesLike>,
@@ -531,22 +534,9 @@ export interface IDeBridgeGate extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  flash(
-    _tokenAddress: PromiseOrValue<string>,
-    _receiver: PromiseOrValue<string>,
-    _amount: PromiseOrValue<BigNumberish>,
-    _data: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   getDebridgeChainAssetFixedFee(
     _debridgeId: PromiseOrValue<BytesLike>,
     _chainId: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  getDefiAvaliableReserves(
-    _tokenAddress: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
@@ -555,20 +545,16 @@ export interface IDeBridgeGate extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  globalFixedNativeFee(
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  globalTransferFeeBps(
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   isSubmissionUsed(
     submissionId: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  requestReserves(
-    _tokenAddress: PromiseOrValue<string>,
-    _amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  returnReserves(
-    _tokenAddress: PromiseOrValue<string>,
-    _amount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -577,10 +563,26 @@ export interface IDeBridgeGate extends BaseContract {
     _amount: PromiseOrValue<BigNumberish>,
     _chainIdTo: PromiseOrValue<BigNumberish>,
     _receiver: PromiseOrValue<BytesLike>,
-    _permit: PromiseOrValue<BytesLike>,
+    _permitEnvelope: PromiseOrValue<BytesLike>,
     _useAssetFee: PromiseOrValue<boolean>,
     _referralCode: PromiseOrValue<BigNumberish>,
     _autoParams: PromiseOrValue<BytesLike>,
+    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  "sendMessage(uint256,bytes,bytes,uint256,uint32)"(
+    _dstChainId: PromiseOrValue<BigNumberish>,
+    _targetContractAddress: PromiseOrValue<BytesLike>,
+    _targetContractCalldata: PromiseOrValue<BytesLike>,
+    _flags: PromiseOrValue<BigNumberish>,
+    _referralCode: PromiseOrValue<BigNumberish>,
+    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  "sendMessage(uint256,bytes,bytes)"(
+    _dstChainId: PromiseOrValue<BigNumberish>,
+    _targetContractAddress: PromiseOrValue<BytesLike>,
+    _targetContractCalldata: PromiseOrValue<BytesLike>,
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -590,6 +592,8 @@ export interface IDeBridgeGate extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    callProxy(overrides?: CallOverrides): Promise<string>;
+
     claim(
       _debridgeId: PromiseOrValue<BytesLike>,
       _amount: PromiseOrValue<BigNumberish>,
@@ -601,22 +605,9 @@ export interface IDeBridgeGate extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    flash(
-      _tokenAddress: PromiseOrValue<string>,
-      _receiver: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      _data: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     getDebridgeChainAssetFixedFee(
       _debridgeId: PromiseOrValue<BytesLike>,
       _chainId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getDefiAvaliableReserves(
-      _tokenAddress: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -627,34 +618,42 @@ export interface IDeBridgeGate extends BaseContract {
       [BigNumber, string] & { nativeChainId: BigNumber; nativeAddress: string }
     >;
 
+    globalFixedNativeFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+    globalTransferFeeBps(overrides?: CallOverrides): Promise<number>;
+
     isSubmissionUsed(
       submissionId: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<boolean>;
-
-    requestReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    returnReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     send(
       _tokenAddress: PromiseOrValue<string>,
       _amount: PromiseOrValue<BigNumberish>,
       _chainIdTo: PromiseOrValue<BigNumberish>,
       _receiver: PromiseOrValue<BytesLike>,
-      _permit: PromiseOrValue<BytesLike>,
+      _permitEnvelope: PromiseOrValue<BytesLike>,
       _useAssetFee: PromiseOrValue<boolean>,
       _referralCode: PromiseOrValue<BigNumberish>,
       _autoParams: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<string>;
+
+    "sendMessage(uint256,bytes,bytes,uint256,uint32)"(
+      _dstChainId: PromiseOrValue<BigNumberish>,
+      _targetContractAddress: PromiseOrValue<BytesLike>,
+      _targetContractCalldata: PromiseOrValue<BytesLike>,
+      _flags: PromiseOrValue<BigNumberish>,
+      _referralCode: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    "sendMessage(uint256,bytes,bytes)"(
+      _dstChainId: PromiseOrValue<BigNumberish>,
+      _targetContractAddress: PromiseOrValue<BytesLike>,
+      _targetContractCalldata: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
     withdrawFee(
       _debridgeId: PromiseOrValue<BytesLike>,
@@ -739,21 +738,6 @@ export interface IDeBridgeGate extends BaseContract {
       globalTransferFeeBps?: null
     ): FixedNativeFeeUpdatedEventFilter;
 
-    "Flash(address,address,address,uint256,uint256)"(
-      sender?: null,
-      tokenAddress?: PromiseOrValue<string> | null,
-      receiver?: PromiseOrValue<string> | null,
-      amount?: null,
-      paid?: null
-    ): FlashEventFilter;
-    Flash(
-      sender?: null,
-      tokenAddress?: PromiseOrValue<string> | null,
-      receiver?: PromiseOrValue<string> | null,
-      amount?: null,
-      paid?: null
-    ): FlashEventFilter;
-
     "MonitoringClaimEvent(bytes32,uint256,uint256)"(
       submissionId?: null,
       lockedOrMintedAmount?: null,
@@ -831,6 +815,10 @@ export interface IDeBridgeGate extends BaseContract {
   };
 
   estimateGas: {
+    callProxy(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     claim(
       _debridgeId: PromiseOrValue<BytesLike>,
       _amount: PromiseOrValue<BigNumberish>,
@@ -842,22 +830,9 @@ export interface IDeBridgeGate extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    flash(
-      _tokenAddress: PromiseOrValue<string>,
-      _receiver: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      _data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     getDebridgeChainAssetFixedFee(
       _debridgeId: PromiseOrValue<BytesLike>,
       _chainId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getDefiAvaliableReserves(
-      _tokenAddress: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -866,20 +841,16 @@ export interface IDeBridgeGate extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    globalFixedNativeFee(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    globalTransferFeeBps(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     isSubmissionUsed(
       submissionId: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    requestReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    returnReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -888,10 +859,26 @@ export interface IDeBridgeGate extends BaseContract {
       _amount: PromiseOrValue<BigNumberish>,
       _chainIdTo: PromiseOrValue<BigNumberish>,
       _receiver: PromiseOrValue<BytesLike>,
-      _permit: PromiseOrValue<BytesLike>,
+      _permitEnvelope: PromiseOrValue<BytesLike>,
       _useAssetFee: PromiseOrValue<boolean>,
       _referralCode: PromiseOrValue<BigNumberish>,
       _autoParams: PromiseOrValue<BytesLike>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    "sendMessage(uint256,bytes,bytes,uint256,uint32)"(
+      _dstChainId: PromiseOrValue<BigNumberish>,
+      _targetContractAddress: PromiseOrValue<BytesLike>,
+      _targetContractCalldata: PromiseOrValue<BytesLike>,
+      _flags: PromiseOrValue<BigNumberish>,
+      _referralCode: PromiseOrValue<BigNumberish>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    "sendMessage(uint256,bytes,bytes)"(
+      _dstChainId: PromiseOrValue<BigNumberish>,
+      _targetContractAddress: PromiseOrValue<BytesLike>,
+      _targetContractCalldata: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -902,6 +889,10 @@ export interface IDeBridgeGate extends BaseContract {
   };
 
   populateTransaction: {
+    callProxy(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     claim(
       _debridgeId: PromiseOrValue<BytesLike>,
       _amount: PromiseOrValue<BigNumberish>,
@@ -913,22 +904,9 @@ export interface IDeBridgeGate extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    flash(
-      _tokenAddress: PromiseOrValue<string>,
-      _receiver: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      _data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     getDebridgeChainAssetFixedFee(
       _debridgeId: PromiseOrValue<BytesLike>,
       _chainId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getDefiAvaliableReserves(
-      _tokenAddress: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -937,20 +915,16 @@ export interface IDeBridgeGate extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    globalFixedNativeFee(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    globalTransferFeeBps(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     isSubmissionUsed(
       submissionId: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    requestReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    returnReserves(
-      _tokenAddress: PromiseOrValue<string>,
-      _amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -959,10 +933,26 @@ export interface IDeBridgeGate extends BaseContract {
       _amount: PromiseOrValue<BigNumberish>,
       _chainIdTo: PromiseOrValue<BigNumberish>,
       _receiver: PromiseOrValue<BytesLike>,
-      _permit: PromiseOrValue<BytesLike>,
+      _permitEnvelope: PromiseOrValue<BytesLike>,
       _useAssetFee: PromiseOrValue<boolean>,
       _referralCode: PromiseOrValue<BigNumberish>,
       _autoParams: PromiseOrValue<BytesLike>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    "sendMessage(uint256,bytes,bytes,uint256,uint32)"(
+      _dstChainId: PromiseOrValue<BigNumberish>,
+      _targetContractAddress: PromiseOrValue<BytesLike>,
+      _targetContractCalldata: PromiseOrValue<BytesLike>,
+      _flags: PromiseOrValue<BigNumberish>,
+      _referralCode: PromiseOrValue<BigNumberish>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    "sendMessage(uint256,bytes,bytes)"(
+      _dstChainId: PromiseOrValue<BigNumberish>,
+      _targetContractAddress: PromiseOrValue<BytesLike>,
+      _targetContractCalldata: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

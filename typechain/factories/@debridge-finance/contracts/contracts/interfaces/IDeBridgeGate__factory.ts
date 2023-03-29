@@ -220,43 +220,6 @@ const _abi = [
     inputs: [
       {
         indexed: false,
-        internalType: "address",
-        name: "sender",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "tokenAddress",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "receiver",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "paid",
-        type: "uint256",
-      },
-    ],
-    name: "Flash",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
         internalType: "bytes32",
         name: "submissionId",
         type: "bytes32",
@@ -478,6 +441,19 @@ const _abi = [
     type: "event",
   },
   {
+    inputs: [],
+    name: "callProxy",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "bytes32",
@@ -523,34 +499,6 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "_tokenAddress",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "_receiver",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_amount",
-        type: "uint256",
-      },
-      {
-        internalType: "bytes",
-        name: "_data",
-        type: "bytes",
-      },
-    ],
-    name: "flash",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "bytes32",
         name: "_debridgeId",
         type: "bytes32",
@@ -562,25 +510,6 @@ const _abi = [
       },
     ],
     name: "getDebridgeChainAssetFixedFee",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_tokenAddress",
-        type: "address",
-      },
-    ],
-    name: "getDefiAvaliableReserves",
     outputs: [
       {
         internalType: "uint256",
@@ -610,6 +539,32 @@ const _abi = [
         internalType: "bytes",
         name: "nativeAddress",
         type: "bytes",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "globalFixedNativeFee",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "globalTransferFeeBps",
+    outputs: [
+      {
+        internalType: "uint16",
+        name: "",
+        type: "uint16",
       },
     ],
     stateMutability: "nonpayable",
@@ -646,42 +601,6 @@ const _abi = [
         name: "_amount",
         type: "uint256",
       },
-    ],
-    name: "requestReserves",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_tokenAddress",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_amount",
-        type: "uint256",
-      },
-    ],
-    name: "returnReserves",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_tokenAddress",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_amount",
-        type: "uint256",
-      },
       {
         internalType: "uint256",
         name: "_chainIdTo",
@@ -694,7 +613,7 @@ const _abi = [
       },
       {
         internalType: "bytes",
-        name: "_permit",
+        name: "_permitEnvelope",
         type: "bytes",
       },
       {
@@ -714,7 +633,81 @@ const _abi = [
       },
     ],
     name: "send",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "submissionId",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_dstChainId",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes",
+        name: "_targetContractAddress",
+        type: "bytes",
+      },
+      {
+        internalType: "bytes",
+        name: "_targetContractCalldata",
+        type: "bytes",
+      },
+      {
+        internalType: "uint256",
+        name: "_flags",
+        type: "uint256",
+      },
+      {
+        internalType: "uint32",
+        name: "_referralCode",
+        type: "uint32",
+      },
+    ],
+    name: "sendMessage",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "submissionId",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_dstChainId",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes",
+        name: "_targetContractAddress",
+        type: "bytes",
+      },
+      {
+        internalType: "bytes",
+        name: "_targetContractCalldata",
+        type: "bytes",
+      },
+    ],
+    name: "sendMessage",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "submissionId",
+        type: "bytes32",
+      },
+    ],
     stateMutability: "payable",
     type: "function",
   },
@@ -731,7 +724,7 @@ const _abi = [
     stateMutability: "nonpayable",
     type: "function",
   },
-];
+] as const;
 
 export class IDeBridgeGate__factory {
   static readonly abi = _abi;

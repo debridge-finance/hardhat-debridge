@@ -80,7 +80,7 @@ const _abi = [
     name: "UpdateOracle",
     type: "event",
   },
-];
+] as const;
 
 export class IOraclesManager__factory {
   static readonly abi = _abi;
