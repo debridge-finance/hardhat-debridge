@@ -11,7 +11,7 @@ import {
   CrossChainCounter__factory,
   CrossChainIncrementor,
   CrossChainIncrementor__factory,
-} from "./fixture-projects/hardhat-debridge-test-env/typechain/index";
+} from "../fixture-projects/hardhat-debridge-test-env/typechain/index";
 
 declare module "mocha" {
   interface Context {
@@ -23,7 +23,7 @@ declare module "mocha" {
 
 export function useEnvironment(fixtureProjectName: string) {
   beforeEach("Loading hardhat environment", function () {
-    process.chdir(path.join(__dirname, "fixture-projects", fixtureProjectName));
+    process.chdir(path.join(__dirname, "..", "fixture-projects", fixtureProjectName));
     this.hre = require("hardhat");
   });
 

@@ -15,11 +15,14 @@
   "scripts": {
     "lint:fix": "prettier --write 'src/**/*.{js,ts}' 'test/**/*.{js,ts}' && tslint --fix --config tslint.json --project tsconfig.json",
     "lint": "tslint --config tslint.json --project tsconfig.json",
-    "test": "mocha --exit --recursive 'test/**/*.test.ts'",
-    "build": "npm-run-all clean build-*",
-    "build-0-aux": "npx hardhat build",
-    "build-1-ts": "tsc",
-    "clean": "rm -rf ./dist",
+    "pretest": "npm run test:build",
+    "test": "hardhat test",
+    "prebuild": "npm run clean",
+    "build": "hardhat compile && hardhat typechain && hardhat build && tsc",
+    "pretest:build": "npm run test:clean",
+    "test:build": "cd fixture-projects/hardhat-debridge-test-env && hardhat compile",
+    "test:clean": "cd fixture-projects/hardhat-debridge-test-env && hardhat clean && rm -rf ./typechain",
+    "clean": "hardhat clean && rm -rf ./dist ./typechain" ,
     "prepare": "npm run build"
   },
   "files": [
@@ -29,6 +32,7 @@
   ],
   "devDependencies": {
     "@debridge-finance/contracts": "github:debridge-finance/debridge-contracts-v1#v4.2.1",
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.4",
     "@nomiclabs/hardhat-ethers": "^2.0.6",
     "@typechain/ethers-v5": "^10.1.0",
     "@typechain/hardhat": "^6.1.2",
@@ -47,8 +51,7 @@
     "tslint": "^5.16.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
-    "typescript": "^4.0.3",
-    "@nomicfoundation/hardhat-chai-matchers": "^1.0.4"
+    "typescript": "^5.6.3"
   },
   "peerDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.6",

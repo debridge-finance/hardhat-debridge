@@ -1,4 +1,6 @@
 /dist
+/typechain
+/fixture-projects/**/typechain
 
 # Logs
 logs

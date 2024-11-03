@@ -145,16 +145,9 @@ export function makeDeployGate(
     await deBridgeGate.setSignatureVerifier(signatureVerifierMock.address);
 
     // setup chain support (loopback)
-    await deBridgeGate.setChainSupport(
-      hre.ethers.provider.network.chainId,
-      true,
-      false
-    );
-    await deBridgeGate.setChainSupport(
-      hre.ethers.provider.network.chainId,
-      true,
-      true
-    );
+    const chainId = await hre.ethers.provider.send("eth_chainId", []);
+    await deBridgeGate.setChainSupport(chainId, true, false);
+    await deBridgeGate.setChainSupport(chainId, true, true);
 
     // setup global fee
     // For emulation purposes, we pick a random value from a range so that
