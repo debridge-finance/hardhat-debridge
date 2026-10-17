@@ -98,7 +98,7 @@ describe("Check emulator functions", function () {
         expect(lastCall.contract).to.eq("DeBridgeGate");
         expect(lastCall.sourceName).to.match(
           new RegExp(
-            "https://github.com/debridge-finance/debridge-contracts-v1/blob/[a-z0-9\.]+/contracts/transfers/DeBridgeGate.sol"
+            "https://github.com/debridge-finance/debridge-contracts-v1/blob/[a-z0-9.]+/contracts/transfers/DeBridgeGate.sol"
           )
         );
       }
